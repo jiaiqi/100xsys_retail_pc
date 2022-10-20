@@ -1,0 +1,53 @@
+{
+  "remark": "如果heap size oom，参考https://www.npmjs.com/package/increase-memory-limit",
+  "name": "bxfront",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "build-lib": "vue-cli-service build --target lib --name bxhome src/index.js",
+    "build-lib4app": "bili --format cjs --name index --plugin vue --vue.css false"
+  },
+  "dependencies": {
+    "core-js": "^2.6.5",
+    "echarts": "^4.2.1",
+    "element-theme": "^2.0.1",
+    "element-ui": "2.8.2",
+    "file-saver": "^2.0.2",
+    "jQuery": "^1.7.4",
+    "jsdom": "^12.1.0",
+    "less": "^3.8.1",
+    "less-loader": "^4.1.0",
+    "location": "0.0.1",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "navigator": "^1.0.1",
+    "v-viewer": "^1.5.1",
+    "vue": "^2.6.10",
+    "vue-layer": "^1.2.0",
+    "vue-pdf": "^4.0.8",
+    "vue-resource": "^1.5.1",
+    "vue-router": "^3.0.3",
+    "vue2-ace-editor": "0.0.13",
+    "vuex": "^3.0.1",
+    "xlsx": "^0.16.4",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.8.0",
+    "@vue/cli-service": "^3.8.0",
+    "@vuese/cli": "^2.5.1",
+    "bili": "^3.4.2",
+    "compression-webpack-plugin": "^6.0.3",
+    "rollup-plugin-vue": "^4.6.1",
+    "sass": "^1.18.0",
+    "sass-loader": "^7.1.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack-dev-server": "^3.7.2"
+  },
+  "description": "## Project setup ``` npm install ```",
+  "main": "babel.config.js",
+  "author": "",
+  "license": "ISC"
+}

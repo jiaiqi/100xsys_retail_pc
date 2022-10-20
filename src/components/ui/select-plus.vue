@@ -1,0 +1,131 @@
+<template>
+    <el-select v-if="formModelData" filterable remote :loading="loading" v-model="formModelData.value" clearable placeholder="输入关键字搜索"  
+        :remote-method="buildFkOptionList" @clear="buildFkOptionList('',tab)" >
+        <!-- @blur="buildFkOptionList(null,tab)" -->
+            <el-option
+            v-for="(item) in formModelData.options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+            </el-option>
+        </el-select>
+</template>
+
+<script>
+export default {
+    name:"select-plus",
+   data() {
+    return {
+       form: {
+          name: '',
+          region: '',
+          date1: '',
+          date2: '',
+          delivery: false,
+          type: [],
+          resource: '',
+          desc: ''
+        },
+        
+          loading:false,
+        onInputValue:false, // 是否有输入值
+        formModelData:{}
+    }
+   },
+   mounted(){
+       this.formModelData = this.formModel
+       this.buildFkOptionList('')
+   },
+   props:{
+       tab:{
+           type:Object,
+           default:()=>{
+               return {}
+           }
+       },
+       formModel:{
+           type:Object,
+           default:()=>{
+               return {}
+           }
+       },
+   },
+   methods:{
+       buildFkOptionList(query){
+           let self = this
+           let e = self.tab
+          console.log('buildFkOptionList',query,e,self.formModel[e.list_tab_no])
+          let conds = []
+          if(this.tab.hasOwnProperty("option_list") && this.tab.option_list.hasOwnProperty("conditions") && this.tab.option_list.conditions){
+            conds = this.tab.option_list.conditions
+          }
+           self.loading = true
+        if (query !== '' && query !== undefined  && query !== null) {
+          let cond=[
+              {"colName": e.option_list.key_disp_col,
+            "ruleType": "[like]",
+            "value": query}
+          ]
+          conds.push(cond)
+        } else {
+          // conds = [];
+        }
+          let options = []
+        //   url, service_name, condition, page, order, group, mapcondition,isproc,columns,relationCondition,draft,pageType
+          self.select(e.option_list.serviceName, conds, null, null, null, null,null, null, null, null,false).then((res) =>{
+              let resData = res.data.data
+                for(let i =0;i<resData.length;i++){
+                    let item = resData[i]
+                    let opt = {
+                            value:item[e.option_list.refed_col],
+                            label:item[e.option_list.key_disp_col]
+                    }
+                     options.push(opt)
+                }
+
+                // self.formModel[e.list_tab_no]['options'] = options
+                // e.options = options
+                // self.$set(self.formModel[e.list_tab_no],"options",options)
+                console.log("options",options)
+                self.formModelData.options = options
+                self.loading = false
+                //  resolve(options)
+            })
+            // self.$set(self.formModel[e.list_tab_no],"options",options)
+        // return new Promise((resolve, reject) => {
+        //       let options = []
+        //   self.select(e.buildoptions.serviceName, [], null, null, null, null).then((res) =>{
+        //       let resData = res.data.data
+        //         for(let i =0;i<resData.length;i++){
+        //             let item = resData[i]
+        //             let opt = {
+        //                     value:item[e.buildoptions.refed_col],
+        //                     label:item[e.buildoptions.key_disp_col]
+        //             }
+        //              options.push(opt)
+                    
+        //         }
+
+        //         self.formModel[e.list_tab_no]['options'] = options
+        //         //  this.$set(e,"options",options)
+        //          resolve(options)
+        //     })
+        // })
+      }
+   },
+   watch: {
+        'formModelData': {
+          deep: true,
+          immediate: true,
+          handler: function (val, oldVal) {
+              if(val.hasOwnProperty('value') && oldVal.hasOwnProperty('value') && val.value !== oldVal.value){
+                        this.$emit('on-value-change',{value:val.value,listNo:tab.list_tab_no})
+              }else if(val.hasOwnProperty('value') && !oldVal.hasOwnProperty('value') && val.value !== oldVal.value){
+                    this.$emit('on-value-change',{value:val.value,listNo:this.tab.list_tab_no})
+              }
+              
+          }
+        },
+    },
+} 
+</script>

@@ -1,0 +1,60 @@
+<meta charset="utf-8">
+<title>bxhome demo</title>
+<script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.4.6/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui@2.4.6/lib/index.js"></script>
+
+<script src="./bxhome.umd.js"></script>
+<link rel="stylesheet" href="./bxhome.css">
+
+<div id="app">
+  <simple-add ref="add" :service="add_service" @form-loaded="addFormLoaded">
+
+  </simple-add>
+  <list ref="list" :service="select_service"></list>
+</div>
+
+
+<script>
+
+
+  top.pathConfig = {}
+  top.pathConfig.application = "vxhr";
+  top.user = {
+    user_code: "yaojz",
+    user_no: "yaojz",
+    email: "9442366@qq.com"
+  }
+
+  sessionStorage.setItem("bx_auth_ticket", "d5082a83-3cba-4927-a3b1-7339ecb4141a");
+
+
+  new Vue({
+    components: {
+      "simple-add": window.bxhome.default.SimpleAdd,
+      "list": window.bxhome.default.TabList
+    },
+    data: function () {
+      return {
+        add_service: "srvsso_user_group_add",
+        select_service: "srvsso_user_select"
+      }
+    },
+    methods: {
+      addFormLoaded() {
+        var addVm = this.$refs.add;
+        // 实现submit按钮的事件处理
+        addVm.actions.submit.executor = null;
+        addVm.actions.submit.invokeFunc = () => {
+          var data = addVm.srvValFormModel();
+          alert(`data is ${JSON.stringify(data)}`)
+
+        }
+      }
+    },
+    mounted: function () {
+
+    }
+  }).$mount('#app')
+
+</script>
