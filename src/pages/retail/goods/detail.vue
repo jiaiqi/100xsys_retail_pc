@@ -1,12 +1,15 @@
 <template>
   <div>
     <nav-bar>商品详情</nav-bar>
-    <bx-detail :service="service" :id="id"></bx-detail>
+    <bx-detail :service="service" :pkid="id" v-if="id"></bx-detail>
   </div>
 </template>
 
 <script>
-import bxDetail from "@/components/common/detail";
+/**
+ * 商品详情
+ */
+import bxDetail from "./components/detail";
 import NavBar from "./components/nav-bar.vue";
 
 export default {

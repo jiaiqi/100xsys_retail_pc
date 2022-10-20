@@ -14,7 +14,7 @@
         <span slot="label"> {{ tabItem.label }}({{ tabItem.len }})</span>
       </el-tab-pane>
     </el-tabs>
-    <div v-if="searchForm" v-show="selectFormShow">
+    <div v-if="searchForm&&selectMode!==true" v-show="selectFormShow">
       <simple-filter
         v-if="srv_cols"
         :srv_cols="srv_cols"
@@ -39,11 +39,9 @@
       </add>
     </div>
 
-    <el-row v-show="!hideButtons" type="flex" class="row-bg" justify="start">
+    <el-row v-show="!hideButtons&&selectMode!==true" type="flex" class="row-bg" justify="start">
       <div class="table-head-btns">
-        <slot name="gridHeader">
-
-        </slot>
+        <slot name="gridHeader"> </slot>
         <template v-for="(item, index) in sortedGridButtons">
           <el-button
             :key="index"
@@ -122,7 +120,7 @@
               v-if="selection && !readOnly"
             >
             </el-table-column>
-            
+
             <el-table-column
               v-for="(item, index) in gridHeader"
               :key="index"
@@ -297,7 +295,7 @@
               v-if="
                 !readOnly &&
                   listType != 'selectlist' &&
-                  !hideButtons &&
+                  !hideButtons&&selectMode!==true &&
                   sortedRowButtons.length > 0
               "
             >
@@ -743,6 +741,7 @@ export default {
     batchApprove,
   },
   props: {
+    selectMode:Boolean,
     childForeignkey: Object,
     defaultCondition: Array,
   },
@@ -845,6 +844,7 @@ export default {
       if ("delete" == type) {
         this.deleteRowData(row, exeservice);
       } else if ("edit" == type) {
+        debugger
         if (
           button.operate_service &&
           Object.prototype.toString.call(button.operate_service) !==
@@ -861,12 +861,19 @@ export default {
         }
         let actionConfig = this.getButtonOptSrv(button, row, "active");
         console.log("getButtonOptSrv", actionConfig);
-        if (this.rowButtonActiveServiceName&&row && row.id) {
-          this.$router.push(`/goods-update?service=${this.rowButtonActiveServiceName}&id=${row.id}`)
+        if (this.rowButtonActiveServiceName && row && row.id) {
+          this.$router.push(
+            {
+              path:`/goods-update?service=${this.rowButtonActiveServiceName}&id=${row.id}`,
+              
+            }
+          );
         } else {
           self.onUpdateClicked(row);
         }
       } else if ("detail" == type) {
+        this.$router.push(`/goods-detail?service=${exeservice}&id=${row.id}`);
+        return;
         var urlParams =
           "/" +
           exeservice +

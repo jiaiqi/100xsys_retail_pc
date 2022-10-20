@@ -1,6 +1,6 @@
 <template>
   <div v-if="service" class="add-goods">
-    <nav-bar>新增商品</nav-bar>
+    <nav-bar>{{title||''}}</nav-bar>
     <add
       name="list-add"
       ref="add-form"
@@ -35,11 +35,14 @@
 </template>
 
 <script>
-import add from "@/components/common/add.vue";
+/**
+ * 商品新增
+ */
+import add from "./components/add.vue";
 import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
-import SimpleAdd from "@/components/common/simple-add";
+import SimpleAdd from "./components/simple-add.vue";
 import NavBar from './components/nav-bar.vue'
 export default {
   name: "goodsAdd",
@@ -51,6 +54,7 @@ export default {
   mixins: [ListPopupMixin, CustButtonMinx, MemListMixin],
   mounted() {
     this.service = this.$route.query.service;
+    this.title = this.$route.query.title;
   },
   methods: {
     onCustomButton(btn) {
@@ -68,6 +72,7 @@ export default {
   },
   data() {
     return {
+      title:"",
       service: "",
       activeForm: "",
       addService: "",

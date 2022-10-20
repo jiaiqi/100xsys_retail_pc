@@ -219,8 +219,8 @@
 </template>
 
 <script>
-import ChildList from "@/components/common/child-list.vue";
-import SimpleAdd from "@/components/common/simple-add.vue";
+import ChildList from "./child-list.vue";
+import SimpleAdd from "./simple-add.vue";
 import ParentChildMixin from "@/components/mixin/parent-child-mixin";
 import FieldRedundantMixin from "@/components/mixin/field-redundant-mixin";
 

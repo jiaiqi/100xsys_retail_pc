@@ -1,155 +1,24 @@
 /* */
 <template>
-  <div
-    v-loading="isFromLoaded.loaded"
-    :element-loading-text="isFromLoaded.text"
-  >
-    <nav-bar>编辑商品</nav-bar>
-
-    <el-form v-if="draftConfig && draftConfig.isDraft">
-      <el-form-item label="自动保存草稿" style="margin-bottom: 0px;">
-        <el-switch v-model="draftConfig.auto_save"></el-switch>
-      </el-form-item>
-    </el-form>
-    <template>
-      <el-alert v-if="pagePrompt" :closable="false" :type="pagePrompt.type">
-        <slot
-          ><div v-html="pagePrompt.description">
-            {{ pagePrompt.description }}
-          </div></slot
-        >
-      </el-alert>
-    </template>
-    <el-row v-show="evalVisible()">
-      <slot name="form-child-prepend"></slot>
-      <el-form
-        :model="formModel"
-        ref="elform"
-        :inline="false"
-        label-position="right"
-        label-width="10rem"
-        v-if="formLoaded"
-      >
-        <el-row v-for="(formItems, section) in sections" :key="section">
-          <div class="el-col el-col-24 el-col-xl-24">
-            <div class="el-form-item" v-if="!!section">
-              <span class="section-title">{{ formatSection(section) }}</span>
-            </div>
-          </div>
-          <slot :name="section + '-begin'"></slot>
-
-          <div v-for="formItem in formItems">
-            <field-editor
-              :field="formItem.field"
-              :content-fields="formItem.contentFields"
-              :key="formItem.field.info.name"
-              :form-model="formModel"
-              :defaultValues="defaultValues"
-              :mainformDatas="parentAddMainFormDatas"
-              :form-has-invalid-error="hasInvalidField()"
-              @field-value-changed="onFieldValueChanged($event)"
-              @field-history-popup="onFieldHistoryPopup"
-            >
-              <div slot="field-child-prepend" class="padding-bottom">
-                <slot
-                  :name="formItem.field.info.name + '-child-prepend'"
-                ></slot>
-              </div>
-              <div slot="field-child-append" class="padding-bottom">
-                <slot :name="formItem.field.info.name + '-child-append'"></slot>
-              </div>
-            </field-editor>
-            <slot :name="formItem.field.info.name + '-append'"></slot>
-          </div>
-        </el-row>
-        <slot name="field-form-append"></slot>
-      </el-form>
-
-      <loader
-        ref="loader"
-        :service="loaderService"
-        :pageIsDraft="pageIsDraft"
-        @loader-complete="onLoaderComplete($event)"
-      >
-      </loader>
-    </el-row>
-    <!-- <slot name="child-body" v-bind:mainForm="formModel"></slot> -->
-    <el-row>
-      <el-col
-        :span="24"
-        style="text-align: center;padding:6px;padding-bottom:20px;"
-      >
-        <action
-          v-for="item in actions"
-          :info="item"
-          :key="item.name"
-          :ref="item.name"
-          :isDraft="pageIsDraft"
-          v-show="item.visibleFunc()"
-          :draftDataKey="draftDataKey"
-          @is-data-key="resDataKey($event)"
-          @form-is-loaded="onIsLoaded($event)"
-          @action-complete="$emit('action-complete', $event)"
-          @executor-complete="$emit('executor-complete', $event)"
-        >
-        </action>
-      </el-col>
-    </el-row>
-
-    <el-dialog
-      append-to-body
-      :visible="!!fieldHisotryPopup"
-      title="历史版本"
-      width="90%"
-      :close-on-click-modal="1 == 2"
-      @close="fieldHisotryPopup = false"
-    >
-      <el-table
-        :data="fieldWithHistory && fieldWithHistory.historyData"
-        stripe
-        border
-        style="width: 100%"
-      >
-        <el-table-column prop="value" label="值"> </el-table-column>
-        <el-table-column prop="remark" label="说明"> </el-table-column>
-      </el-table>
-    </el-dialog>
+  <div v-if="pk && service_name">
+    <nav-bar>{{ title || "" }}</nav-bar>
+    <bx-update :service="service_name" :pk="pk"></bx-update>
   </div>
 </template>
 
 <script>
-import FieldEditor from "@/components/common/field-editor.vue";
-import FormMixin from "@/components/mixin/form-mixin";
-import FieldRedundantMixin from "@/components/mixin/field-redundant-mixin";
-import FormValidateMixin from "@/components/mixin/form-validate-mixin";
-import Loader from "@/components/common/loader.vue";
-import Action from "@/components/common/action.vue";
-import { ActionInfo } from "@/components/model/ActionInfo";
-import { ExecutorInfo } from "@/components/model/ExecutorInfo";
-import Vue from "vue";
-import CustButtonMinx from "@/components/mixin/cust-button-minx";
-import { FieldInfo } from "@/components/model/FieldInfo";
-import { Field } from "@/components/model/Field";
-import NavBar from './components/nav-bar.vue'
-
+/**
+ * 商品编辑
+ */
+import BxUpdate from "./components/update.vue";
+import NavBar from "./components/nav-bar.vue";
 export default {
-  name: "simple-update",
+  name: "goods-update",
   components: {
-    FieldEditor,
-    action: Action,
-    loader: Loader,
-    NavBar
+    NavBar,
+    BxUpdate,
   },
-  mixins: [FormMixin, CustButtonMinx, FieldRedundantMixin, FormValidateMixin],
   props: {
-    childrenLists: {
-      type: Array,
-    },
-    formType: {
-      type: String,
-      default: "update",
-    },
-
     pkCol: {
       type: String,
       default: "id",
@@ -157,19 +26,6 @@ export default {
 
     id: {
       type: String,
-    },
-
-    initLoad: {
-      type: Boolean,
-      default: true,
-    },
-    parentPageType: {
-      type: String,
-      default: "",
-    },
-    haveDraft: {
-      type: Boolean,
-      default: false,
     },
     appNo: {
       type: String,
@@ -179,6 +35,9 @@ export default {
     },
   },
   computed: {
+    title() {
+      return this.$route.query.title;
+    },
     pk() {
       return this.$route.query.id || this.id;
     },
@@ -378,6 +237,7 @@ export default {
   created: function() {},
 
   mounted: function() {
+    return;
     this.createFields(
       (srvCol) => srvCol.in_update != 0 || srvCol.in_detail != 0,
       null,

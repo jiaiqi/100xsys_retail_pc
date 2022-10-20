@@ -41,7 +41,7 @@
 </template>
 <script>
 /**
- * 商品属性页面
+ * 商品调价页面
  */
 import List from "./components/list";
 import Add from "./components/add.vue";
@@ -73,25 +73,14 @@ export default {
       activeName: "tab0",
       tabs: [
         {
-          label: "商品分类",
-          service: "srvretail_goods_classify_select",
-          condition: [],
-          type: "treelist",
+          label: "新增调价",
+          service: "srvretail_modify_price_record_add",
+          type: "add",
         },
         {
-          label: "商品单位",
-          service: "srvretail_store_unit_select",
-          condition: [],
-        },
-        {
-          label: "商品品牌",
-          service: "srvretail_goods_brand_select",
-          condition: [],
-        },
-        {
-          label: "商品标签",
-          service: "srvretail_goods_lable_select",
-          condition: [],
+          label: "调价历史",
+          service: "srvretail_modify_price_record_select",
+          type: "list",
         },
       ],
     };

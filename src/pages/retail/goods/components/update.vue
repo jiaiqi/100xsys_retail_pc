@@ -236,11 +236,12 @@ export default {
     },
 
     pkCol: {
-      type: String
+      type: String,
+      default:"id"
     },
 
     pk: {
-      type: String
+      type: [String,Number]
     },
 
     initLoad: {

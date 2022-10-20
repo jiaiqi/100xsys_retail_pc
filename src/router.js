@@ -74,6 +74,15 @@ import PersonalInfo from '@/vxhr/personal-info'
 import PersonalInfoUpdate from '@/vxhr/personal-info-update'
 import PersonalUpdate from '@/vxhr/personal-update'
 
+// 商品管理
+import goodsUpdate from '@/pages/retail/goods/update.vue'
+import goodsAdd from '@/pages/retail/goods/add.vue'
+import goodsDetail from '@/pages/retail/goods/detail.vue'
+import goodsAttr from '@/pages/retail/goods/attribute.vue'
+import goodsList from '@/pages/retail/goods/list.vue'
+import supplier from '@/pages/retail/goods/supplier.vue'
+
+
 import test_field from '@/components/test/test_field'
 // const excelEditView = ()=>import("@/components/common/luckysheet.vue")
 // pages
@@ -290,30 +299,36 @@ export default new Router({
       path: '/goods-list',
       name: 'goodsList',
       // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue'),
-      component: resolve => require(['@/pages/retail/goods/list.vue'],resolve) ,
+      component: goodsList ,
     },
     {
       path: '/goods-add',
       name: 'goodsAdd',
       // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue'),
-      component: resolve => require(['@/pages/retail/goods/add.vue'],resolve) ,
+      component: goodsAdd ,
     },
     {
       path: '/goods-detail',
       name: 'goodsDetail',
       // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue'),
-      component: resolve => require(['@/pages/retail/goods/detail.vue'],resolve) ,
+      component:goodsDetail,
     },
     {
       path: '/goods-update',
       name: 'goodsUpdate',
-      // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue'),
-      component: resolve => require(['@/pages/retail/goods/update.vue'],resolve) ,
+      component: goodsUpdate,
+      // component: resolve => require(['@/pages/retail/goods/update.vue'],resolve) ,
     },{
       path: '/goods-attr',
       name: 'goodsAttr',
       // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue'),
-      component: resolve => require(['@/pages/retail/goods/attribute.vue'],resolve) ,
+      component: goodsAttr ,
+    },
+    {
+      path: '/supplier',
+      name: 'supplier',
+      // component: import(/* webpackChunkName: "goods" */ '@/pages/retail/goods/list.vue')
+      component: supplier ,
     },
 
   ]

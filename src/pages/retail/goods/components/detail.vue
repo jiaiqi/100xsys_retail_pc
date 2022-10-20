@@ -363,7 +363,7 @@ export default {
       },
     },
     pkid: {
-      type: String,
+      type: [String,Number],
     },
 
     defaultConditions: {
@@ -397,10 +397,10 @@ export default {
   data() {
     return {
       activeName: 1,
-      id: this.pkid || this.$route.params.id,
-      condcol: this.$route.params.condcol,
-      condvalue: this.$route.params.condvalue,
-      service_name: this.service || this.$route.params.service_name,
+      id: this.pkid || this.$route.query.id,
+      condcol: this.$route.query.condcol,
+      condvalue: this.$route.query.condvalue,
+      service_name: this.service || this.$route.query.service_name,
       detailData: {},
       custService: "",
       custCondition: [],
