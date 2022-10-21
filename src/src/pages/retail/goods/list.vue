@@ -135,6 +135,7 @@
         v-if="activeForm == 'add-child'"
         :submit2-db="!isMem()"
         :service="getAddService"
+        @submitted2mem="onAdd2MemSubmitted"
       >
       </simple-add>
     </el-dialog>

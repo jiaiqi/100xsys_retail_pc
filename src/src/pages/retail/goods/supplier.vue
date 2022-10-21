@@ -1,123 +1,25 @@
 <template>
   <div>
     <el-container style="border: 1px solid #eee;padding:10px;">
-      <el-aside style="width:auto">
-        <div style="min-width:250px" class="flex flex-column h-full">
-          <!-- <template v-for="(item, index) in rowButton">
-            <i
-              :key="index"
-              v-if="item.button_type == 'addchild'"
-              @click="rowButtonClick('', '')"
-              class="el-icon-document-add"
-            ></i>
-          </template> -->
-          <div class="button-box flex justify-around" v-if="!selectMode">
-            <el-button
-              type="primary"
-              size="small"
-              v-if="addButton"
-              @click="rowButtonClick(addButton)"
-              >+新增分类</el-button
-            >
-            <!-- <el-button type="primary" size="small">编辑分类</el-button> -->
-          </div>
-          <div class="tree-container flex-1">
-            <!-- <el-input
-              suffix-icon="el-icon-search"
-              style="width:240px"
-              placeholder="输入关键字进行过滤"
-              v-model="filterText"
-            >
-            </el-input> -->
-            <div
-              class="text-blue text-700 text-center p-10 cursor-pointer"
-              @click="clearCondition"
-            >
-              全部商品
-            </div>
-            <el-tree
-              class="filter-tree"
-              :data="treeData"
-              :props="defaultProps"
-              default-expand-all
-              :filter-node-method="filterNode"
-              :expand-on-click-node="1 == 2"
-              highlight-current
-              node-key="id"
-              @node-click="handleNodeClick"
-              ref="tree"
-            >
-              <span class="custom-tree-node" slot-scope="{ node, data }">
-                <span>{{ node.label }}</span>
-                <span @click.stop="">
-                  <el-dropdown v-if="!selectMode">
-                    <span class="el-dropdown-link">
-                      <i class="el-icon-s-tools"></i>
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <template v-for="(item, index) in rowButton">
-                        <el-dropdown-item :key="index">
-                          <i
-                            @click="rowButtonClick(item, data)"
-                            v-bind:class="item.icon"
-                            >{{ item.button_name }}</i
-                          >
-                        </el-dropdown-item>
-                      </template>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </span>
-              </span>
-            </el-tree>
-          </div>
-        </div>
-      </el-aside>
       <el-main>
-        <div v-if="mainType == 'detail'">
-          <div>
-            <detail
-              :detailshow="detailshow"
-              v-if="showTreeDetail == '1'"
-              form-type="detail"
-              name="tree-node-detail"
-              ref="tree-node-detail"
-              :service="service_name"
-              :pkid="getCurrentCondition()"
-            ></detail>
-          </div>
-
-          <div>
-            <detail
-              :detailshow="detailshow"
-              v-if="showTreeDetail == '2'"
-              form-type="detail"
-              name="tree-node-detail"
-              ref="tree-node-detail"
-              :service="service_name"
-              :pkid="getCurrentCondition()"
-            ></detail>
-          </div>
-        </div>
-        <div v-else-if="mainType == 'list'">
           <list
             ref="list"
             list-type="list"
             :storage-type="storageType"
             :default-condition="listCondition"
-            :service="right_service"
+            :service="service_name"
             :selectMode="selectMode"
             @grid-data-changed="$emit('grid-data-changed', $event)"
           >
             <template #gridHeader v-if="!selectMode">
-              <el-button size="small" type="primary" @click="toAdd" v-if="right_service==='srvretail_goods_info_select'"
-                >+新增商品</el-button
+              <el-button size="small" type="primary" @click="toAdd"
+                >+新增供应商</el-button
               >
-              <el-button size="small" type="primary" @click="showBatchUpdate"
+              <!-- <el-button size="small" type="primary" @click="showBatchUpdate"
                 >批量修改</el-button
-              >
+              > -->
             </template>
           </list>
-        </div>
       </el-main>
     </el-container>
 
@@ -163,9 +65,6 @@
         :service="getAddService"
         :default-conditions="getDefaultCondition4Duplicate"
         :submit2-db="storageType == 'db'"
-        @action-complete="onAddFormActionComplete($event)"
-        @form-loaded="onDuplicateFormLoaded"
-        @submitted2mem="onAdd2MemSubmitted"
       >
       </simple-add>
     </el-dialog>
@@ -181,7 +80,7 @@
     >
       <batch-update
         :multipleSelection="multipleSelection"
-        service="srvretail_goods_info_update"
+        service="srvretail_supplier_info_update"
         @cancel="activeForm = 'x'"
         @success="batchUpdateSuccess"
         v-if="activeForm == 'batchUpdate'"
@@ -192,7 +91,7 @@
 
 <script>
 /**
- * 商品管理
+ * 供应商信息
  */
 import ChildList from "@/components/common/child-list";
 import SimpleAdd from "@/components/common/simple-add";
@@ -221,14 +120,7 @@ export default {
   },
   computed: {
     service_name() {
-      return this.service || this.$route.query.service_name;
-    },
-    right_service() {
-      return (
-        this.rightService ||
-        this.$route.query.right_service ||
-        this.$route.query.mainservice
-      );
+      return this.service || this.$route.query.service_name||'srvretail_supplier_info_select';
     },
     addButton() {
       return this.rowButton.find((item) => item.button_type === "addchild");
@@ -294,7 +186,7 @@ export default {
     },
     // 跳转到新增页面
     toAdd() {
-      this.$router.push(`/goods-add?service=srvretail_goods_info_add&title=新增商品`);
+      this.$router.push(`/goods-add?service=srvretail_supplier_info_add&title=新增供应商`);
     },
     getListSelection() {
       if (this.$refs.list && this.$refs.list.multipleSelection) {
@@ -479,7 +371,7 @@ export default {
         this.detailshow = true;
       }
     }
-    this.loadTableData();
+    // this.loadTableData();
   },
 };
 </script>

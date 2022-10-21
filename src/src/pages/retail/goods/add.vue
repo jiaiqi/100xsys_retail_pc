@@ -24,6 +24,7 @@
         v-if="activeForm == 'add-child'"
         :submit2-db="!isMem()"
         :service="addService"
+        @form-loaded="onAddChildFormLoaded()"
       >
       </simple-add>
     </el-dialog>
