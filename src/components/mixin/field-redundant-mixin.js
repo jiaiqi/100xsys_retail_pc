@@ -9,6 +9,7 @@ export default {
   methods: {
 
     handleRedundantOnFormModelChange: function (newVal, oldVal, fields, formModelFunc) {
+      let self = this
       if (!this.isLoaded()) {
         return;
       }
@@ -49,7 +50,7 @@ export default {
         if (fieldInfo.redundant ) {
           if (!(diffFields.size == 1 && diffFields.has(fieldName))) {
             let vm = this
-            this.handleRedundantViaJs(field, formModelFunc, vm)
+            self.handleRedundantViaJs(field, formModelFunc, vm)
           }
         }
       }

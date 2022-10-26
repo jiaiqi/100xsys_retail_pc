@@ -1,5 +1,5 @@
 <template>
-    <el-select v-if="formModelData" filterable remote :loading="loading" v-model="formModelData.value" clearable placeholder="输入关键字搜索"  
+    <el-select v-if="formModelData" filterable remote :loading="loading" v-model="formModelData.value" clearable :placeholder="placeholder"  
         :remote-method="buildFkOptionList" @clear="buildFkOptionList('',tab)" >
         <!-- @blur="buildFkOptionList(null,tab)" -->
             <el-option
@@ -49,6 +49,10 @@ export default {
                return {}
            }
        },
+       placeholder:{
+         type:String,
+         default:""
+       }
    },
    methods:{
        buildFkOptionList(query){
@@ -56,23 +60,23 @@ export default {
            let e = self.tab
           console.log('buildFkOptionList',query,e,self.formModel[e.list_tab_no])
           let conds = []
-          if(this.tab.hasOwnProperty("option_list") && this.tab.option_list.hasOwnProperty("conditions") && this.tab.option_list.conditions){
-            conds = this.tab.option_list.conditions
-          }
+          this.tab.option_list.conditions = []
+          // if(this.tab.hasOwnProperty("option_list") && this.tab.option_list.hasOwnProperty("conditions") && this.tab.option_list.conditions){
+          //   conds = this.tab.option_list.conditions
+          // }
            self.loading = true
         if (query !== '' && query !== undefined  && query !== null) {
-          let cond=[
-              {"colName": e.option_list.key_disp_col,
+          let cond= {"colName": e.option_list.key_disp_col,
             "ruleType": "[like]",
             "value": query}
-          ]
           conds.push(cond)
         } else {
-          // conds = [];
+          conds = [];
         }
+         let c = this.tab.option_list.conditions.concat(conds)
           let options = []
         //   url, service_name, condition, page, order, group, mapcondition,isproc,columns,relationCondition,draft,pageType
-          self.select(e.option_list.serviceName, conds, null, null, null, null,null, null, null, null,false).then((res) =>{
+          self.select(e.option_list.serviceName, c, null, null, null, null,null, null, null, null,false).then((res) =>{
               let resData = res.data.data
                 for(let i =0;i<resData.length;i++){
                     let item = resData[i]

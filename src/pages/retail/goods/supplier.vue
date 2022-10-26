@@ -104,10 +104,14 @@ import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
 
-import List from "./components/list";
-import detail from "./components/detail.vue";
+// import List from "./components/list";
+// import detail from "./components/detail.vue";
+// import BxUpdate from "./components/update.vue";
+import List from "@/components/common/list";
+import detail from "@/components/common/detail.vue";
+import BxUpdate from "@/components/common/update.vue";
+
 import BatchUpdate from "./components/batch-update.vue";
-import BxUpdate from "./components/update.vue";
 
 export default {
   name: "goodsList",

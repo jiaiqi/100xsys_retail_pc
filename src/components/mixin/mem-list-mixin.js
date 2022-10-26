@@ -21,7 +21,7 @@ export default {
     // true for support inplac edit
     inplaceEdit: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     defaultInplaceEditMode: {
@@ -386,7 +386,7 @@ export default {
       let copy = _.cloneDeep(row);
       this.$set(copy, "_dirtyFlags", "add")
       delete copy.id
-      delete copy._guid
+      delete copy._guid 
 
       let standbyRow = _.find(this.gridData, item => item._dirtyFlags === "standby");
       _.assign(standbyRow, copy)
@@ -485,7 +485,7 @@ export default {
         });
       }
       return newRow
-    },
+    }, 
     addStandbyRow(e) {
       let standbyRow = _.find(this.gridData, row => row._dirtyFlags === 'standby');
       if (!!standbyRow) {
@@ -543,8 +543,9 @@ export default {
     ,
 
     buildEditData: function (row) {
+      let self = this
       let isAdd = row._dirtyFlags === "standby" || row._dirtyFlags === "add";
-      let editSrvCols = isAdd ? this.addSrvCols : this.updateSrvCols;
+      let editSrvCols = isAdd ? self.addSrvCols : self.updateSrvCols;
       let srvcolInFlag = isAdd ? "in_add" : "in_update";
 
       let fields = editSrvCols
@@ -575,7 +576,10 @@ export default {
           return field;
         });
 
-      let _fieldMap = {id: row.id, _guid: row._guid};
+      let _fieldMap = {id: row.id};
+      if(row._guid){
+        _fieldMap['_guid'] = row._guid
+      }
       let list = this;
       let formModelDecorator = function (formModel) {
         if (formModel) {
@@ -585,13 +589,21 @@ export default {
 
       // create an virtual form for this row
       let inlineForm = new InlineForm(fields, formModelDecorator);
-      fields.forEach(field => {
-        field.form = inlineForm
+      for(let field of fields){
+        //10-22
+        field['form'] = inlineForm
+        
         _fieldMap[field.key] = field
-      });
+      }
+      // fields.forEach(field => {
+      //   field.form = inlineForm
+      //   _fieldMap[field.key] = field
+      // });
 
+      // this.buildDependentFields(isAdd ? _fieldMap : fields);
       this.buildDependentFields(_fieldMap);
 
+      // console.log('inplaceEditData.push =>',_fieldMap,fields)
       this.inplaceEditData.push(_fieldMap);
 
       // watch the row
@@ -705,6 +717,38 @@ export default {
               }
             })
           })
+      }else if(this.inplaceEditMode && this.listType == "updatechildlist" && this.moreConfig.hasOwnProperty("childListConfig") && this.updateSrvCols.length == 0){
+        this.loadAddUpdateSrvCols()
+        .then(_ => {
+          
+
+          // clear old data
+          this.inplaceEditData.splice(0, this.inplaceEditData.length)
+
+          this.gridData.forEach(row => {
+            if (!row._dirtyFlags) {
+              // 如果没有 dirtyFlags，设置默认的flags
+              this.$set(row, "_dirtyFlags", this.defaultDirtyFlags)
+              if (this.defaultDirtyFlags === "add") {
+                this.$set(row, "_guid", this.guid())
+                this.$set(row, "id", null)
+              }
+            }
+
+            this.buildEditData(row)
+          })
+
+          // this.addStandbyRow();
+
+          // this.$nextTick(_ => {
+          //   this.inplaceEditMode = true;
+
+          
+          //   if (this.$refs.inlineList) {
+          //     this.$refs.inlineList.filter(item => item.listLoaded).forEach(item => item.onInplaceEditClicked())
+          //   }
+          // })
+        })
       }
     }
     ,
@@ -781,7 +825,7 @@ export default {
       }
 
       let field = this.findEditField(row, column);
-
+      this.onRowChangeRedundant(row,column)
       if (field) {
         let fieldMap = _.find(this.inplaceEditData, item => (item.id && item.id === row.id) || (item._guid && item._guid === row._guid));
         this.handleFieldFkRedundant(field, fieldMap);
@@ -1054,7 +1098,6 @@ export default {
           return;
         }
 
-        
         this.$emit("grid-data-changed", this);
       },
       {

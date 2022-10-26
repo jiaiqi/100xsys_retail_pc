@@ -428,14 +428,18 @@ export class FieldInfo {
       if (colSpan == '0.25') {
         colspanObj['xl'] = cols * colSpan;
         colspanObj['lg'] = cols * colSpan;
-        colspanObj['md'] = cols * colSpan * 8 / 6;
-        colspanObj['sm'] = cols * colSpan * 2;
+        // colspanObj['sm'] = cols * colSpan * 2;
+        // colspanObj['md'] = cols * colSpan * 8 / 6;
+        colspanObj['md'] = cols;
+        colspanObj['sm'] = cols;
         colspanObj['xs'] = cols;
       } else if (colSpan == '0.5') {
         colspanObj['xl'] = cols * colSpan;
         colspanObj['lg'] = cols * colSpan;
-        colspanObj['md'] = cols * colSpan;
-        colspanObj['sm'] = cols * colSpan * 2;
+        // colspanObj['md'] = cols * colSpan;
+        // colspanObj['sm'] = cols * colSpan * 2;
+        colspanObj['md'] = cols;
+        colspanObj['sm'] = cols;
         colspanObj['xs'] = cols;
       } else if (colSpan == 1) {
         colspanObj['xl'] = cols * colSpan;

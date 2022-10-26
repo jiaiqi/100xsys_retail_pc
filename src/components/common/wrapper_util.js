@@ -193,6 +193,7 @@ export class Wrapper4Header {
   }
 
   evalVersatileFlagVar(flagVar) {
+    
     if (_.isBoolean(flagVar)) {
       return flagVar;
     } else if (_.isFunction(flagVar)) {

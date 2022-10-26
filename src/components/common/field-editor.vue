@@ -32,7 +32,6 @@
           style="width: 10rem; text-overflow: ellipsis;overflow: hidden;white-space: nowrap;"
         >
 
-          {{field.info.label}}
 
           <el-button
             v-if="field.info.explain !== ''"
@@ -42,6 +41,8 @@
             slot="reference"
             icon="el-icon-question"
           ></el-button>
+          
+          {{field.info.label}}:
 
         </label>
       </template>
@@ -227,7 +228,7 @@ label.required::before {
   font-weight: 600 !important;
 }
 .el-form label.normal {
-  color: #3f65b1 !important;
+  /* color: #3f65b1 !important; */
 }
 div.el-form-item {
   margin-bottom: -3px;
@@ -235,7 +236,7 @@ div.el-form-item {
 }
 
 div.invalid_form_item {
-  margin-bottom: 16px !important;
+  /* margin-bottom: 16px !important; */
 }
 .el-form-item__error {
   padding-top: 0px;

@@ -25,16 +25,36 @@
 
 /* form
 --------------------------*/
+.bxdialog{
+  .el-dialog__header{
+    text-align: center;
+    background-color: @basic-color-primary;
+    .el-dialog__title,.el-dialog__headerbtn .el-dialog__close{
+      
+    color:@basic-color-white;
+    }
+  }
+  .el-card__body{
+    padding:0;
+  }
+}
 
 .el-input .el-input__count .el-input__count-inner {
   background: transparent;
 }
+.el-input.is-disabled .el-input__inner {
+  background-color: #ffffff;
+  border-color: #ffffff!important;
+}
 .el-form{
   .el-form-item{
     .el-form-item__label{
-      color: #3f65b1;
+      color: #282b33;
     }
     .el-form-item__content{
+      .detail-border{
+        border-color: #fff!important;
+      }
       .el-input-number,.el-date-editor.el-input{
         // width: @full-width;
         max-width: @input-input-number-max-width;
@@ -60,7 +80,8 @@
     }
     &.fix_height_form_item{
       // 固定去除1像素
-      height: @padding-basic*24!important;
+      height: @padding-basic*20!important;
+      margin-bottom: 12px;
     }
   }
   /*from分组标题样式section*/
@@ -117,10 +138,17 @@
   padding: @padding-basic * 3;
 }
 .el-table{
+  color: #000;
   thead{
     .cell{
       padding-left:4px;
       padding-right:4px;
+    }
+  }
+  tr.header-row{
+    th{
+      background-color:#DCDFE6;
+      color: rgb(34, 37, 43);
     }
   }
   .cell{
@@ -146,7 +174,7 @@
       line-clamp: 1;
       -webkit-box-orient: vertical;
     }
-  }
+  }0
   td{
     padding:0 4px!important;
   }
@@ -154,7 +182,7 @@
     // background-color: #06a0dd;
     // color: #fff;
     >.cell{
-        color: rgb(83, 103, 133);
+        
         padding-left:4px;
         padding-right:4px;
         white-space: nowrap;
@@ -165,8 +193,35 @@
     }
   }
 }
+/**
+列表头部过滤条件样式
+*/
+.filter-list-view{
+  .el-form .el-form-item .el-form-item__label{
+    font-weight: bold !important;
+
+    .el-input__inner{
+      border-radius: 0!important;
+    }
+}
+}
+/***
+* group-by-layout 表头统计栏目
+*/
+.row-bg-group-layout{
+  border: 1px solid #f2f2f2;
+  .group-by-layout{
+    padding: 6px 4px;
+    // font-weight: bold;
+    font-size: 18px;
+    color: #18191b;
+  }
+}
+
+
 
 /**
+
 公共区块边框
 */
 .padding-bottom{

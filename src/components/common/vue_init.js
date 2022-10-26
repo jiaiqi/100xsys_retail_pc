@@ -39,8 +39,10 @@ function init() {
 
       // back_server_ip: "192.168.0.241",    // 240 139.129.128.155:5021   中铁
       // back_server_port: "8080",
-      back_server_ip: "192.168.0.155",    // 240 139.129.128.155:5021   零售   http://192.168.0.155:8106
-      back_server_port: "8106",
+      // back_server_ip: "192.168.0.155",    // 240 139.129.128.155:5021   零售   http://192.168.0.155:8106
+      // back_server_port: "8106",
+      back_server_ip: "139.196.209.46",    // 240 139.129.128.155:5021   零售 外网   http://192.168.0.155:8106
+      back_server_port: "4678",
 
 
       // back_server_ip: "192.168.0.241",    // 240 139.129.128.155:5021   中铁
@@ -123,30 +125,35 @@ function init() {
                 login_page="/"+top.getLoginAddress();
               }
             } catch (exception) { }
-
-            this.getRootWindow().layer.open({
-              title: false,
-              type: 2,
-              content: window.location.origin+login_page,
-              closeBtn: 0,
-              area: ['300px', '350px'],
-              shade: 0.9
-            });
+            // this.getRootWindow().layer.alert('您长时间未操作,登录信息已过期', {
+            //   skin: 'layui-layer-molv' //样式类名
+            //   , closeBtn: 0
+            // }, function () {
+            //   window.location.href = login_page;
+            // });
+            // this.getRootWindow().layer.open({
+            //   title: false,
+            //   type: 2,
+            //   content: window.location.origin+login_page,
+            //   closeBtn: 0,
+            //   area: ['300px', '350px'],
+            //   shade: 0.9
+            // });
 
           } else {
             // 当vue页面在iframe中时，跳转到登录页面
-            if (top !== window) {
+            // if (top !== window) {
 
-              var login_page="/main/index.html";
-              try {
-                if (top.getMainAddress ) {
-                  console.info("1");
-                  login_page="/"+top.getMainAddress();
-                }
-              } catch (exception) { }
+            //   var login_page="/main/index.html";
+            //   try {
+            //     if (top.getMainAddress ) {
+            //       console.info("1");
+            //       login_page="/"+top.getMainAddress();
+            //     }
+            //   } catch (exception) { }
 
-              window.location.href =window.location.origin+login_page;
-            }
+            //   window.location.href =window.location.origin+login_page;
+            // }
           }
 
 

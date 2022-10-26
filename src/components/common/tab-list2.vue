@@ -39,12 +39,14 @@
                   v-if="isTreeReal() && storageType === 'db'"
                   :list-type="listType()"
                   :storage-type="storageType"
+              :inplace-edit="inplaceEdit"
                   :service="getService()"
                   :default-condition="getDefaultConditions"
         >
         </treegrid> 
         <list ref="list"
               v-else
+              :tableButtonRouterType="tableButtonRouterType"
               :list-type="listType()"
               :storage-type="storageType"
               :service="getService()"
@@ -54,6 +56,7 @@
               :default-inplace-edit-mode="defaultInplaceEditMode"
               :default-dirty-flags="defaultDirtyFlags"
               @grid-data-changed="$emit('grid-data-changed', $event)"
+              @on-grid-button="$emit('on-grid-button', $event)"
               @v2-loaded-isDraft="v2LoadedIsDraft($event)"
         >
         </list>
@@ -107,6 +110,10 @@
     },
 
     props: {
+      tableButtonRouterType:{
+      type:String,
+      default:"bxconfig", // checkEditPage 'bxconfig' 
+    },
       service: {
         type: String
       },
@@ -191,7 +198,11 @@
             }
           }
         }
-
+        if(Array.isArray(this.defaultCondition)&&this.defaultCondition.length>0){
+          this.defaultCondition.forEach(item => {
+            conditions.push(item)
+          });
+        }
         return conditions;
       }
 
@@ -201,9 +212,10 @@
     methods: {
       
       onFilterChange(e){
+        let self = this
         this.onInputValue = e
-        if(e){
-          let tabsConds = this.$refs.filterTabs.buildConditions()
+        if(e && self.$refs.filterTabs){
+          let tabsConds = self.$refs.filterTabs.buildConditions()
           this.relationCondition = tabsConds
         }
       },
@@ -217,7 +229,7 @@
       },
       getTableDatas(){
         let self = this
-        let tabsConds = this.$refs.filterTabs.buildConditions()
+        let tabsConds = self.$refs.filterTabs ? self.$refs.filterTabs.buildConditions() : {}
         // this.$set('relationCondition',tabsConds)
         this.relationCondition = tabsConds
         setTimeout(function(){
@@ -456,7 +468,7 @@
             tab.inputType = mc.inputType || null
             tab.showAllTag = mc.showAllTag || false
             tab.default = mc.default || '',
-            tab.placeholder = mc.placeholder || '请输入...'
+            tab.placeholder = mc.placeholder ||  mc.type === 'select' ? '请选择': '请输入'
             tab.remoteMethod=""
 
             if(tab._colName){

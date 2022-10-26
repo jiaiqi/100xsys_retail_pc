@@ -31,6 +31,7 @@
     <el-table
       ref="treegrid"
       :data="gridData"
+       header-row-class-name="header-row" 
       stripe
       border
       lazy
@@ -129,9 +130,7 @@
             :key="index"
             style="margin-right:10px"
             v-if="getDispExps(button, scope.row) && button.permission"
-            v-show="
-              button.button_type === '_btn_group' ||
-                isRowButtonVisible(button, scope.row)
+            v-show="button.button_type === '_btn_group' ||isRowButtonVisible(button, scope.row)
             "
           >
             <el-button

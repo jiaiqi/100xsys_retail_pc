@@ -29,7 +29,10 @@ function init_util() {
     "report":"/vpages/index.html#/reportList"
   }
 
-
+  Vue.prototype.dialogWidth = function(n){
+     let w = n * 10
+     return  ""+w + "%"
+  }
   Vue.prototype.download = function(filePath,name){
 
     // let url = this.serviceApi().downloadFile + filePath
@@ -1158,6 +1161,7 @@ Vue.prototype.word2number = function(w,type){
    * @returns {*}
    */
   Vue.prototype.evalBxExpr = function (expr, data, vm, defaultValue) {
+    let mainData = defaultValue
     try {
       let user = top.user;
       return eval(expr)
@@ -1253,6 +1257,7 @@ Vue.prototype.word2number = function(w,type){
             if(config && config.indexOf('field') !== -1){
               config = JSON.parse(config)
               child["_childMoreConfig"] = config
+              child["mainData"] = mainData
               if(config.hasOwnProperty("showPagination")){
                 child['showPagination'] = config.showPagination
               }

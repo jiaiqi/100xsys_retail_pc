@@ -18,38 +18,7 @@
     </treegrid>
 
     <list-proc ref="list" :service="service" v-else-if="isProc"> </list-proc>
-    <tableEdit ref="mlist" 
-      :name="name"
-      :pageType="foreignKey.view_model"
-      :pageIsDraft="pageIsDraft"
-      :showPagination="childListConfig.showPagination && showPagination"
-      :list-type="listType"
-      :defaultCondition="defaultCondition"
-      :storage-type="storageType"
-      :service="service"
-      :childForeignkey="foreignKey"
-      :def-data-para="defDataPara"
-      :read-only="readOnly"
-      :childforeignvalue="getRefColValue"
-      :default-condition="getDefaultConditions"
-      :inplace-edit="inplaceEdit"
-      :default-inplace-edit-mode="defaultInplaceEditMode"
-      :default-dirty-flags="defaultDirtyFlags"
-      :merge-col="mergeCol"
-      :listMainFormDatas="mainFormDatas"
-      :main-data="mainData?mainData:formModel"
-      :$srvApp="$srvApp"
-      @child-loaded="childDataLoadedRun($event)"
-      @list-loaded="onListLoaded"
-      @inline-list-loaded="onInlineListLoaded"
-      @add-form-loaded="onAddFormLoaded($event)"
-      @update-form-loaded="onUpdateFormLoaded($event)"
-      @duplicate-form-loaded="onAddFormLoaded($event)"
-      @filter-form-loaded="onFilterFormLoaded"
-      @list-data-loaded="listLoaded($event)"
-      @grid-data-changed="$emit('grid-data-changed', $event)"
-      @standby-row-added="onStandbyRowAdded"
-      v-else-if="foreignKey.view_model == 'mlist'"></tableEdit>
+    
     <list
       ref="list"
       :key="service"
@@ -90,14 +59,12 @@
 </template>
 
 <script>
-import SimpleAdd from "./simple-add.vue";
+import SimpleAdd from "@/components/common/simple-add.vue";
 import SimpleUpdate from "@/components/common/simple-update.vue";
-import List from "./list.vue";
+import List from "@/components/common/list.vue";
 import Treegrid from "@/components/common/treegrid.vue";
 import ListProc from '@/components/common/listproc.vue'
 import ChildListMixin from "@/components/mixin/child-list-mixin"
-
-import tableEdit from "@/components/common/table-edit.vue"  // 新增的增强表格
 
 /**
  * 子表组件， 主要是处理外键相关的逻辑： 例如外籍列、外键disp列隐藏；添加行数据自动添加外键列的值。
@@ -108,8 +75,7 @@ export default {
     SimpleUpdate,
     SimpleAdd,
     List,
-    ListProc,
-    tableEdit
+    ListProc
   },
 
   mixins: [ ChildListMixin ],
@@ -120,6 +86,10 @@ export default {
     }
   },
   props: {
+    inplaceEdit: { //子表是树形表
+      type: Boolean,
+      default: false,
+    },
     defaultCondition: {
       type: Array,
       default: function () {

@@ -694,7 +694,6 @@ import multiFinder from "@/components/ui/multi-finder.vue";
 import UEditor from "@/components/ui/ueditor.vue";
 // import UploadFile from "@/components/ui/upload-file.vue";
 import UploadImage from "@/components/ui/upload-image.vue";
-import TreeFinder from "@/components/ui/tree-finder.vue";
 import BxInputNumber from "@/components/ui/bx-input-number.vue";
 import Userlist from "@/components/ui/userlist.vue";
 import QrCode from "@/components/ui/qrcode.vue";
@@ -704,6 +703,8 @@ import Checkbox from "@/components/ui/checkbox.vue";
 import ueditorPlus from "@/components/ui/ueditor-plus.vue";
 import dynamicSubTemp from "@/components/ui/dynamic-sub-temp.vue"; // 动态子组件
 import goodsSelector from "./goods-selector.vue";
+import TreeFinder from "./tree-finder.vue";
+
 export default {
   components: {
     Checkbox,

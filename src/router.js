@@ -74,6 +74,7 @@ import PersonalInfo from '@/vxhr/personal-info'
 import PersonalInfoUpdate from '@/vxhr/personal-info-update'
 import PersonalUpdate from '@/vxhr/personal-update'
 
+import checkEditer from '@/pages/retail/checkEditPlus/check_edit_plus'
 // 商品管理
 import goodsUpdate from '@/pages/retail/goods/update.vue'
 import goodsAdd from '@/pages/retail/goods/add.vue'
@@ -81,10 +82,13 @@ import goodsDetail from '@/pages/retail/goods/detail.vue'
 import goodsAttr from '@/pages/retail/goods/attribute.vue'
 import goodsList from '@/pages/retail/goods/list.vue'
 import supplier from '@/pages/retail/goods/supplier.vue'
+import vipSet from '@/pages/retail/goods/vipSet.vue'
 
 
 import test_field from '@/components/test/test_field'
 // const excelEditView = ()=>import("@/components/common/luckysheet.vue")
+// 权限设置
+import authority from '@/pages/authority.vue'
 // pages
 Vue.use(Router)
 Vue.use(VueResource)
@@ -116,7 +120,6 @@ export default new Router({
       name: 'update',
       component: Update
     },
-
     {
       path: '/simple-filter/:service_name',
       name: 'simple-filter',
@@ -296,6 +299,14 @@ export default new Router({
       }
     },
     {
+      path: '/retail/checkEditer/:service_name',
+      name: 'check-editer',
+      component: checkEditer,
+      meta:{
+        compName:'checkEditer'
+      }
+    },
+    {
       path: '/goods-list',
       name: 'goodsList',
       component: goodsList ,
@@ -314,9 +325,29 @@ export default new Router({
       path: '/goods-update',
       name: 'goodsUpdate',
       component: goodsUpdate,
+    },
+    {
+      path: '/goods-update/:service_name/:pkCol/:pk',
+      name: 'goodsUpdatePk',
+      component: goodsUpdate
+    },
+    {
+      path: '/custom-update/:service_name/:pkCol/:pk',
+      name: 'goodsUpdatePk',
+      component: goodsUpdate
     },{
       path: '/goods-attr',
       name: 'goodsAttr',
+      component: goodsAttr ,
+    },
+    {
+      path: '/goods-attr',
+      name: 'goodsAttr',
+      component: goodsAttr ,
+    },
+    {
+      path: '/tabs',
+      name: 'tabs',
       component: goodsAttr ,
     },
     {
@@ -324,6 +355,15 @@ export default new Router({
       name: 'supplier',
       component: supplier ,
     },
-
+    {
+      path: '/vipSet',
+      name: 'vipSet',
+      component: vipSet ,
+    },
+    {
+      path: '/authority/:type/:role_no',
+      name: 'authority',
+      component: authority ,
+    }
   ]
 })

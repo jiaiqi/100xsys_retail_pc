@@ -83,7 +83,7 @@ if (!top.pathConfig) {
     }
   }
 
-  sessionStorage.setItem("bx_auth_ticket", "xabxdzkj-0d853594-665d-40dc-bfd8-55dfa0fa9aa1");
+  sessionStorage.setItem("bx_auth_ticket", "xabxdzkj-a2f8e27f-eb1f-4562-94a8-8e3e2cdbf5b4");
 }
 
 

@@ -1,11 +1,12 @@
 <template>
   <div v-if="service" class="add-goods">
-    <nav-bar>{{title||''}}</nav-bar>
+    <!-- <nav-bar>{{title||'新增'}}</nav-bar> -->
     <add
       name="list-add"
       ref="add-form"
       :service="service"
       @on-custom-button="onCustomButton"
+      nav2LocationStr="goodsList"
       @action-complete="onAddFormActionComplete($event)"
     >
     </add>
@@ -22,7 +23,7 @@
         name="list-add-child"
         ref="add-child-form"
         v-if="activeForm == 'add-child'"
-        :submit2-db="!isMem()"
+        :submit2-db="true"
         :service="addService"
       >
       </simple-add>
@@ -34,12 +35,18 @@
 /**
  * 商品新增
  */
-import add from "./components/add.vue";
+// import add from "./components/add.vue";
+// import SimpleAdd from "./components/simple-add.vue";
+import add from "@/components/common/add.vue";
+import SimpleAdd from "@/components/common/simple-add.vue";
+
+import NavBar from './components/nav-bar.vue'
+
+
 import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
-import SimpleAdd from "./components/simple-add.vue";
-import NavBar from './components/nav-bar.vue'
+
 export default {
   name: "goodsAdd",
   components: {

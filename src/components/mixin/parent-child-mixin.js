@@ -50,11 +50,19 @@ export default {
       let basicForm = this.$refs.basicForm;
       return basicForm ? basicForm.loaderService : null;
     },
-
     fields: function () {
       return this.getBasicForm().fields;
     },
+    onUpdateFormModel: function () {
+      let self =this
+      let model = {};
+         let fieldsArr = self.fields || []
+      for (let key in fieldsArr) {
+        model[ key ] = fieldsArr[ key ].model;
+      }
 
+      return model;
+    },
     actions: function () {
       return this.getBasicForm().actions;
     },
@@ -62,19 +70,19 @@ export default {
       // console.log('childListRun')
       let self = this
       let list
+      let mainData = self.mainFormDatas
       if(self.formType && (self.formType === 'detail' || self.formType === 'procdetail')){
         if(self.child_service.length > 0){
-          list = self.buildChildListConfig(self.child_service)
+          list = self.buildChildListConfig(self.child_service,mainData)
         }
       }else{
         if(self.childrenList.length > 0){
-          list = self.buildChildListConfig(self.childrenList)
+          list = self.buildChildListConfig(self.childrenList,mainData)
         }
       }
       for(let f in list){
         let item = list[f]
         for(let child in item){
-          let mainData = self.mainFormDatas
           let data = self.mainFormDatas
           let childs = item[child]
           if(childs.length > 0){

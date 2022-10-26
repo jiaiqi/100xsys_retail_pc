@@ -62,6 +62,12 @@ export default {
         return null
       }
     },
+    mainFormDatas:{
+      type: Object,
+      default: function () {
+        return null
+      }
+    },
     approvalFormMode: {
       type: Object,
       default: function () {

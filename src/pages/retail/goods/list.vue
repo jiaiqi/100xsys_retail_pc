@@ -103,13 +103,18 @@
             ref="list"
             list-type="list"
             :storage-type="storageType"
-            :default-condition="listCondition"
+            :defaultCondition="listCondition"
             :service="right_service"
+            :relation_condition="{}"
             :selectMode="selectMode"
             @grid-data-changed="$emit('grid-data-changed', $event)"
           >
             <template #gridHeader v-if="!selectMode">
-              <el-button size="small" type="primary" @click="toAdd" v-if="right_service==='srvretail_goods_info_select'"
+              <el-button
+                size="small"
+                type="primary"
+                @click="toAdd"
+                v-if="right_service === 'srvretail_goods_info_select'"
                 >+新增商品</el-button
               >
               <el-button size="small" type="primary" @click="showBatchUpdate"
@@ -123,7 +128,8 @@
 
     <el-dialog
       title="添加"
-      width="90%"
+      custom-class="bxdialog"
+      :width="dialogWidth(addDialogWidth)"
       :close-on-click-modal="1 == 2"
       :visible="activeForm == 'add-child'"
       @close="activeForm = 'xx'"
@@ -132,8 +138,13 @@
       <simple-add
         name="list-add-child"
         ref="add-child-form"
+        :navAfterSubmit="false"
         v-if="activeForm == 'add-child'"
-        :submit2-db="!isMem()"
+        :submit2-db="storageType == 'db'"
+        @action-complete="onAddFormActionComplete($event)"
+        @executor-complete="onAddFormActionComplete($event)"
+        @form-loaded="onDuplicateFormLoaded"
+        @submitted2mem="onAdd2MemSubmitted"
         :service="getAddService"
       >
       </simple-add>
@@ -164,6 +175,7 @@
         :default-conditions="getDefaultCondition4Duplicate"
         :submit2-db="storageType == 'db'"
         @action-complete="onAddFormActionComplete($event)"
+        @executor-complete="onAddFormActionComplete($event)"
         @form-loaded="onDuplicateFormLoaded"
         @submitted2mem="onAdd2MemSubmitted"
       >
@@ -202,10 +214,11 @@ import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
 
-import List from "./components/list";
-import detail from "./components/detail.vue";
+import List from "@/components/common/tab-list2";
+import detail from "@/components/common/detail.vue";
+import BxUpdate from "@/components/common/update.vue";
+
 import BatchUpdate from "./components/batch-update.vue";
-import BxUpdate from "./components/update.vue";
 
 export default {
   name: "goodsList",
@@ -220,14 +233,27 @@ export default {
     BxUpdate,
   },
   computed: {
+    addDialogWidth() {
+      let config = this.srv_more_config || {};
+      let dialogWidth = 8;
+      if (config && config.hasOwnProperty("addDialogWidth")) {
+        dialogWidth = config.addDialogWidth || 8;
+      }
+      return dialogWidth;
+    },
     service_name() {
-      return this.service || this.$route.query.service_name;
+      return (
+        this.service ||
+        this.$route.query.service_name ||
+        "srvretail_goods_classify_select"
+      );
     },
     right_service() {
       return (
         this.rightService ||
         this.$route.query.right_service ||
-        this.$route.query.mainservice
+        this.$route.query.mainservice ||
+        "srvretail_goods_info_select"
       );
     },
     addButton() {
@@ -278,6 +304,10 @@ export default {
     },
   },
   methods: {
+    onAddFormActionComplete() {
+      this.activeForm = "";
+      this.loadTableData();
+    },
     batchUpdateSuccess() {
       this.activeForm = "x";
       this.refreshTable();
@@ -285,6 +315,7 @@ export default {
     // 批量编辑弹框
     showBatchUpdate() {
       let selectRows = this.getListSelection();
+      debugger;
       if (Array.isArray(selectRows) && selectRows.length > 0) {
         this.multipleSelection = selectRows;
         this.activeForm = "batchUpdate";
@@ -294,7 +325,9 @@ export default {
     },
     // 跳转到新增页面
     toAdd() {
-      this.$router.push(`/goods-add?service=srvretail_goods_info_add&title=新增商品`);
+      this.$router.push(
+        `/goods-add?service=srvretail_goods_info_add&title=新增商品`
+      );
     },
     getListSelection() {
       if (this.$refs.list && this.$refs.list.multipleSelection) {
@@ -302,9 +335,9 @@ export default {
       }
     },
     refreshTable() {
-      if (this.$refs.list && this.$refs.list.loadTableData) {
+      if (this.$refs.list && this.$refs.list.getTableDatas) {
         this.$nextTick(() => {
-          this.$refs.list.loadTableData();
+          this.$refs.list.getTableDatas();
         });
       }
     },

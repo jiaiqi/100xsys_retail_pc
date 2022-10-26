@@ -1,9 +1,10 @@
 <template>
   <div>
-    <el-card class="box-card">
-      <div slot="header" class="clearfix">
+    <!-- <el-card class="box-card"> -->
+      <!-- <div slot="header" class="clearfix">
         <span>{{ label }}</span>
-      </div>
+          :mainFormDatas="formModel"
+      </div> -->
       <div class="text item">
         <simple-update
            :approvalFormMode="approvalFormMode" 
@@ -18,9 +19,12 @@
           :submit2-db="submit2Db"
           :parentAddMainFormDatas="parentMainFormDatas"
           :srvval-form-model-decorator="srvvalFormModelDecorator"
+          :mainFormDatas="defaultValues"
           :pk="gotPk()"
           :pk-col="pkCol"
           :init-load="initLoad"
+          :navAfterSubmit="navAfterSubmit"
+          :nav2LocationStr="nav2LocationStr"
           @form-loaded="onBasicFormLoaded"
           @action-complete="$emit('action-complete', $event)"
           @form-model-changed="onInnerFormModelChanged($event)"
@@ -53,8 +57,8 @@
                   :is-tree="!!item.parent_no_col"
                   :inplace-edit="true"
                   list-type="updatechildlist"
-                  :mainFormDatas="mainFormDatas?mainFormDatas:formModel"
-                  :default-inplace-edit-mode="false"
+                  :mainFormDatas="onUpdateFormModel"
+                  :default-inplace-edit-mode="true"
                   :merge-col="false"
                   @update-form-loaded="$emit('update-form-loaded', $event)"
                   @add-form-loaded="$emit('add-form-loaded', $event)"
@@ -91,8 +95,8 @@
                   :is-tree="!!item.parent_no_col"
                   :inplace-edit="true"
                   list-type="updatechildlist"
-                  :mainFormDatas="mainFormDatas?mainFormDatas:formModel"
-                  :default-inplace-edit-mode="false"
+                  :mainFormDatas="onUpdateFormModel"
+                  :default-inplace-edit-mode="true"
                   :merge-col="false"
                   @update-form-loaded="$emit('update-form-loaded', $event)"
                   @add-form-loaded="$emit('add-form-loaded', $event)"
@@ -130,8 +134,8 @@
                   :is-tree="!!item.parent_no_col"
                   :inplace-edit="true"
                   list-type="updatechildlist"
-                  :mainFormDatas="mainFormDatas?mainFormDatas:formModel"
-                  :default-inplace-edit-mode="false"
+                  :mainFormDatas="onUpdateFormModel"
+                  :default-inplace-edit-mode="true"
                   :merge-col="false"
                   @update-form-loaded="$emit('update-form-loaded', $event)"
                   @add-form-loaded="$emit('add-form-loaded', $event)"
@@ -168,8 +172,8 @@
                   :is-tree="!!item.parent_no_col"
                   :inplace-edit="true"
                   list-type="updatechildlist"
-                  :mainFormDatas="mainFormDatas?mainFormDatas:formModel"
-                  :default-inplace-edit-mode="false"
+                  :mainFormDatas="onUpdateFormModel"
+                  :default-inplace-edit-mode="true"
                   :merge-col="false"
                   @update-form-loaded="$emit('update-form-loaded', $event)"
                   @add-form-loaded="$emit('add-form-loaded', $event)"
@@ -271,7 +275,7 @@
           </template>
         </el-collapse>
       </div> -->
-    </el-card>
+    <!-- </el-card> -->
   </div>
 </template>
 
@@ -283,7 +287,7 @@ import ParentChildMixin from '../mixin/parent-child-mixin'
 export default {
   name: "update",
   components: {
-    SimpleUpdate,
+    SimpleUpdate, 
     ChildList:() => import("./child-list.vue"),
   },
   mixins: [ ParentChildMixin, ],
@@ -308,12 +312,16 @@ export default {
     defaultValues: {
       type: Object
     },
-
+    // 提交后是否跳转
     navAfterSubmit: {
       type: Boolean,
       default: true,
     },
-
+    // 提交后跳转的路由name
+    nav2LocationStr:{
+      type: String,
+      default: '',
+    },
     label: {
       type: String,
       default: "编辑",
@@ -351,7 +359,19 @@ export default {
       default: '',
     }
   },
+  computed:{
+    
+    
+    // onUpdateFormModel: function () {
+    //   let model = {};
 
+    //   for (let key in this.fields) {
+    //     model[ key ] = this.fields[ key ].model;
+    //   }
+
+    //   return model;
+    // }
+  },
   data () {
     return {
       service_name: this.service || this.$route.params.service_name,
@@ -359,13 +379,19 @@ export default {
       mainFormDatas: {},
     };
   },
-
   methods: {
     childDataLoadedRun(e){
       this.$emit("child-loaded",e)
     },
     getChildGridData:function(){
       let childs = this.$refs
+    },
+    getFormModel:function(){
+       let model = {}
+       for(let item in this.fields){
+        model[item] = this.fields[item].model
+       }
+       return model
     },
     onInnerFormModelChanged: function (e) {
       let self = this
@@ -386,7 +412,7 @@ export default {
               let field = fieldsMap[ key ]
               if (field && field.getSrvVal) {
                 let vm = this
-                this.handleRedundantViaJs(field, _ => row, vm)
+                self.$refs.basicForm.handleRedundantViaJs(field, _ => row, vm)
               }
             }
           })

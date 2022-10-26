@@ -174,7 +174,7 @@ export default {
     },
 
     pk: {
-      type: String,
+      type: [String,Number],
     },
     childrenLists: {
       type: null,

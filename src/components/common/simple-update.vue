@@ -4,7 +4,7 @@
     :element-loading-text="isFromLoaded.text">
     <el-form v-if="draftConfig && draftConfig.isDraft" >
         <el-form-item label="自动保存草稿" style="margin-bottom: 0px;">
-          <el-switch v-model="draftConfig.auto_save"></el-switch>
+          <el-switch v-model="draftConfig.auto_save"></el-switch> 
         </el-form-item>
         </el-form>
     <template>
@@ -23,7 +23,7 @@
                v-if="formLoaded"
       >
         <el-row v-for="(formItems, section) in sections" :key="section">
-          <div class="el-col el-col-24 el-col-xl-24">
+          <div class="el-col el-col-24 el-col-xl-24" v-show="formatSection(section)">
             <div class="el-form-item" v-if="!!section">
               <span class="section-title">{{formatSection(section)}}</span>
             </div>
@@ -53,7 +53,7 @@
 
 
         </el-row>
-      <slot name="field-form-append"></slot>
+      <slot :mainFormDatas="mainFormDatas" name="field-form-append"></slot>
 
       </el-form>
 
@@ -67,7 +67,7 @@
     <!-- <slot name="child-body" v-bind:mainForm="formModel"></slot> -->
     <el-row>
       <el-col :span="24"
-              style="text-align: center;padding:6px;padding-bottom:20px;">
+              style="text-align: center;padding:6px;">
         <action v-for="item in actions" :info="item" :key="item.name"
                 :ref="item.name"
                 :isDraft="pageIsDraft"
@@ -129,6 +129,11 @@
     },
     mixins: [FormMixin, CustButtonMinx, FieldRedundantMixin, FormValidateMixin],
     props: {
+      
+    nav2LocationStr: {
+      type: String,
+      default: "list"
+    },
       childrenLists:{
         type:Array
       },
@@ -225,8 +230,8 @@
 
         if (this.navAfterSubmit) {
           submitAction.nav2Location = {
-            name: 'list',
-            params: {service_name: this.loaderService},
+             name: this.nav2LocationStr,
+          params: { service_name: this.loaderService }
           };
         }
 

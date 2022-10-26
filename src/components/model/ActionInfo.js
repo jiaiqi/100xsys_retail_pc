@@ -40,11 +40,11 @@ export class ActionInfo {
     "grid":{
       "type": "primary", 
       "style":"", 
-      "size":"small", 
+      "size":"medium", 
       "icon":""
     },
     "row":{
-      "type": "plain", 
+      "type": "text", 
       "style":"", 
       "size":"mini", 
       "icon":""
@@ -52,7 +52,7 @@ export class ActionInfo {
     "form":{
       "type": "primary", 
       "style":"", 
-      "size":"mini", 
+      "size":"medium", 
       "icon":""
     }
   }

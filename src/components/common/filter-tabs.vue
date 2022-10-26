@@ -1,11 +1,12 @@
 <template>
 <el-row class="filter-list-view" v-if="tabs.length > 0 &&  Object.keys(formModel).length > 0 ">
-     <el-form ref="form" label-width="80px" size="mini">
-        <el-form-item  :label="tab.label" v-for="(tab,index) in tabs" :key="index">
+     <el-form ref="form" label-width="80px" size="medium " :inline="tabsInline">
+        <el-form-item  :label="tab.label" v-for="(tab,index) in tabRun" :key="index">
+            
             <div v-if="tab._type === 'input'">
                 <el-row :gutter="5">
                     <el-col :span="6">
-                        <el-input col="2" :placeholder="tab.placeholder" clearable :name="tab.list_tab_no" v-model="formModel[tab.list_tab_no].value"></el-input>
+                        <el-input col="2" :placeholder="tab.placeholder + tab.label" clearable :name="tab.list_tab_no" v-model="formModel[tab.list_tab_no].value"></el-input>
                     </el-col>
                     <!-- <el-col :span="6">
                         <el-radio-group :disabled="formModel[tab.list_tab_no].value == ''" v-model="inputMoreConfig.value">
@@ -26,7 +27,7 @@
                 </el-col>
             </div>
             <div  v-if="tab._type === 'select'">
-                <selectPlus :ref="tab.list_tab_no" :tab="tab" :formModel="formModel[tab.list_tab_no]" @on-value-change="selectChange($event)"></selectPlus>
+                <selectPlus :ref="tab.list_tab_no" :placeholder="tab.placeholder + tab.label" :tab="tab" :formModel="formModel[tab.list_tab_no]" @on-value-change="selectChange($event)"></selectPlus>
                 <!-- <el-select filterable remote :loading="loading" v-model="formModel[tab.list_tab_no].value" clearable placeholder="输入关键字搜索"  
                 :remote-method="buildFkOptionList" @blur="buildFkOptionList(null,tab)">
                     <el-option
@@ -100,6 +101,7 @@ export default {
         return [];
       }
     },
+    
     cols: {
       type: Array,
       default: function() {
@@ -117,7 +119,18 @@ export default {
       tabRun:function(){
           let self = this
           let tabs = self.tabs
+          tabs = tabs.map((item,index) =>{
+              if(!item.orders){
+                  item.orders = index + tabs.length
+              }
+              return item
+          })
+          tabs = tabs.sort((a,b) => a.orders-b.orders)
           return tabs
+      },
+      tabsInline:function(){
+         let inline = true
+         return inline
       }
   },
   created() {
@@ -643,4 +656,6 @@ export default {
 .el-form-item--mini.el-form-item, .el-form-item--small.el-form-item{
     margin-bottom: 8px;
 }
+
+
 </style>

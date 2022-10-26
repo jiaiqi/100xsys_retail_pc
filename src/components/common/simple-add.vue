@@ -27,7 +27,7 @@
 
           <div v-for="formItem in formItems">
             <!-- <field-editor :field="formItem.field" :content-fields="formItem.contentFields" :key="formItem.field.info.name" :defaultCondition='defaultCondition' :childForeignkey="childForeignkey" :mainformDatas='mainformDatas' :form-has-invalid-error="hasInvalidField()" @field-value-changed="onFieldValueChanged($event)" :defaultValues='defaultValues' v-if="formItem.field.info.visible" v-show="formItem.field.info.visible &&formItem.field.info.name!=referenced_column_name"> -->
-            <field-editor :field="formItem.field" @on-custom-button="$emit('on-custom-button', $event)" :content-fields="formItem.contentFields" :key="formItem.field.info.name" :defaultCondition='defaultCondition' :childForeignkey="childForeignkey" :mainformDatas='mainformDatas||parentAddMainFormDatas' :form-has-invalid-error="hasInvalidField()" @field-value-changed="onFieldValueChanged($event)" :defaultValues='defaultValues' v-show="formItem.field.info.visible && formItem.field.info.visible &&formItem.field.info.name!=referenced_column_name">
+            <field-editor :field="formItem.field" :content-fields="formItem.contentFields" :key="formItem.field.info.name" :defaultCondition='defaultCondition' :childForeignkey="childForeignkey" :mainformDatas='mainformDatas||parentAddMainFormDatas' :form-has-invalid-error="hasInvalidField()"  @on-custom-button="$emit('on-custom-button', $event)" @field-value-changed="onFieldValueChanged($event)" :defaultValues='defaultValues' v-show="formItem.field.info.visible && formItem.field.info.visible &&formItem.field.info.name!=referenced_column_name">
 
               <div slot="field-child-prepend" class="padding-bottom">
                 <slot :name="formItem.field.info.name + '-child-prepend'"></slot>
@@ -50,7 +50,7 @@
     <!-- <slot name="child"></slot> -->
     <!-- <slot name="child"></slot> -->
     <el-row>
-      <el-col :span="24" style="text-align: center;padding:6px;padding-bottom:20px;">
+      <el-col :span="24" style="text-align: center;padding:6px;">
         <action v-for="item in actions" :info="item" :key="item.name" :ref="item.name" :isDraft="pageIsDraft" v-show="(item.visibleFunc)()" :draftDataKey="draftDataKey" @is-data-key="resDataKey($event)" @form-is-loaded="onIsLoaded($event)" @action-complete="$emit('action-complete', $event);" @executor-complete="$emit('executor-complete', $event)">
         </action>
       </el-col>
@@ -85,6 +85,11 @@ export default {
     formType: {
       type: String,
       default: "add"
+    },
+    
+    nav2LocationStr: {
+      type: String,
+      default: "list"
     },
     parentPageType: {
       type: String,
@@ -154,7 +159,7 @@ export default {
 
       if (this.navAfterSubmit && this.parentPageType.indexOf("list") == -1) {
         submitAction.nav2Location = {
-          name: "list",
+          name: this.nav2LocationStr,
           params: { service_name: this.loaderService }
         };
       }

@@ -27,6 +27,21 @@
         @update-form-loaded="onUpdateFormLoaded($event)"
       >
       </treegrid>
+      <bx-update
+        :service="tab.service"
+        :pk="tab.pk"
+        :pkCol="tab.pkCol"
+        :navAfterSubmit="tab.navAfterSubmit"
+        :nav2LocationStr="tab.navRouterName"
+        v-else-if="tab.type === 'update'"
+      >
+      </bx-update>
+      <bx-detail
+        :service="tab.service"
+        :pkid="tab.pk"
+        :pkCol="tab.pkCol"
+        v-else-if="tab.type === 'detail'"
+      ></bx-detail>
       <list
         v-else
         ref="list"
@@ -43,10 +58,13 @@
 /**
  * 商品属性页面
  */
-import List from "./components/list";
-import Add from "./components/add.vue";
+// import List from "./components/list";
+// import Add from "./components/add.vue";
+
+import List from "@/components/common/tab-list2";
+import Add from "@/components/common/add.vue";
+
 import Treegrid from "@/components/common/treegrid.vue";
-import detail from "@/components/common/detail.vue";
 import ChildList from "@/components/common/child-list";
 import SimpleAdd from "@/components/common/simple-add";
 import simpleFilter from "@/components/common/simple-filter";
@@ -54,6 +72,8 @@ import SimpleUpdate from "@/components/common/simple-update";
 import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
+import BxUpdate from "@/components/common/update.vue";
+import bxDetail from "@/components/common/detail";
 
 export default {
   mixins: [ListPopupMixin, CustButtonMinx, MemListMixin],
@@ -66,7 +86,8 @@ export default {
     SimpleAdd,
     SimpleUpdate,
     simpleFilter,
-    detail,
+    BxUpdate,
+    bxDetail,
   },
   data() {
     return {
@@ -110,6 +131,11 @@ export default {
         Array.isArray(operator_params.tabs)
       ) {
         this.tabs = operator_params.tabs;
+      } else {
+        if (this.$route.name === "tabs") {
+          this.tabs = [];
+          return;
+        }
       }
     }
   },

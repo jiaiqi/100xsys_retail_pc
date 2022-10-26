@@ -60,7 +60,7 @@ export default {
       custCondition: [],
       gridPage: {
         pageSizes: [],
-        pageSize: this.listType.indexOf('list') !== -1 && this.listType != 'list' && this.listType != 'treelist'? 5:10,
+        pageSize: this.listType != 'list' && this.listType != 'treelist'? 5:10,
         currentPage: 1,
         total: 0
       },
@@ -86,6 +86,10 @@ export default {
   },
 
   props: {
+    tableButtonRouterType:{
+      type:String,
+      default:"bxconfig", // checkEditPage 'bxconfig' 
+    },
     name: {
       type: String,
       default: 'main'
@@ -230,6 +234,11 @@ export default {
           return false
         }
     },
+    isShowRowButtons:function(){
+       let isShow = true
+       let config = this.moreConfig && this.moreConfig.hasOwnProperty("isShowRowButtons") ? this.moreConfig.isShowRowButtons   : isShow
+       return config
+    },
     gridDataRun:function(){
         // 重新构造 gridData 为了过滤内存表删除操作
         let self = this
@@ -356,7 +365,15 @@ export default {
       h = h <= 1 ? 800 : h;
       console.info("max table height: " + h)
       return this.tableHeight || (h * ratio);
-    }
+    },
+    listDialogWidth(){
+      let config = this.moreConfig||{}
+      let dialogWidth = 8
+      if(config && config.hasOwnProperty('listDialogWidth')){
+        dialogWidth =  config.listDialogWidth || 8
+      }
+      return dialogWidth
+   }
     // showPagination(){
       // let self = this
       // let isShow = self.showPagination
@@ -366,6 +383,7 @@ export default {
   },
 
   methods: {
+    
     getButtonOptSrv(btn,row,type){
          let self = this
          let serviceName=""
@@ -859,7 +877,13 @@ export default {
             self.list_inner_add = true;
           }
         } else {
-          self.onAddClicked();
+          if(self.tableButtonRouterType == 'checkEditPage'){
+              console.log("点击了添加")
+              self.$emit('on-grid-button', button)
+          }else{
+            
+            self.onAddClicked();
+          }
         }
 
 
@@ -1009,7 +1033,15 @@ export default {
         this.onBatchApprove(this.multipleSelection,button);
       }
     },
-
+    // handleSelectionChange(val) {
+    //   let self =this
+    //   console.log(val)
+    //   self.clickedRow = val;
+    // },
+    // getSelectionRowData(){
+    //   let self =this
+    //    return self.clickedRow
+    // },
     rowButtonClick(operate_item, row) {
       let self =this
       let button = operate_item;
@@ -1056,7 +1088,13 @@ export default {
         }
        let actionConfig = this.getButtonOptSrv(button,row,'active')
         console.log('getButtonOptSrv',actionConfig)
-        self.onUpdateClicked(row);
+        if(self.tableButtonRouterType == 'checkEditPage'){
+           console.log('点击了编辑')
+           self.onUpdateClicked(row);
+        }else{
+          self.onUpdateClicked(row);
+
+        }
       } else if ("detail" == type) {
         var urlParams = "/" + exeservice + "/" + row.id + "?srvApp=" + this.resolveDefaultSrvApp() + '&isdraft=' + this.draftRun;//跳转
         var disp_col = operate_item._disp_col;
@@ -1551,13 +1589,13 @@ export default {
           });
         } else {
           //加载表格数据
-          if (this.defaultapi == "select") {
+          if (self.defaultapi == "select") {
             // console.log(this.pageSize)
             
-            let relationCondition = this.relationCondition
+            let relationCondition = self.relationCondition
             // console.log(this.showPagination)
             // service_name, condition, page, order, group, mapcondition, app,isproc,columns,relationCondition
-            return this.select(
+            return self.select(
               this.service_name,
               this.condition,
               this.showPagination? page : null,
@@ -1568,36 +1606,42 @@ export default {
               null,
               null,
               relationCondition,
-              this.draftRun,
+              self.draftRun,
               "list_page"
             ).then(response => {
-              this.gridData = response.body.data;
+              self.gridData = response.body.data;
               let page = response.body.page
               if(!page){
                 page = { total:response.body.data.length }
               }
                // 草稿标前显示 数量
-              if(this.draftRun){
-                this.tabsConfig[1].len = page.total || 0
+              if(self.draftRun){
+                self.tabsConfig[1].len = page.total || 0
               }else{
-                this.tabsConfig[0].len = page.total || 0
+                self.tabsConfig[0].len = page.total || 0
               }
 
-              if(this.listType.indexOf("childlist") !== -1){
+              if(self.listType.indexOf("childlist") !== -1){
                 // 汇聚子表数据
-                if(this.storageType === 'mem' && this.inplaceEdit){
-                  this.gridData.forEach(row => {
-                    if (!row._dirtyFlags && this.defaultDirtyFlags === 'add') {
+                if(self.storageType === 'mem' && self.inplaceEdit){
+                  self.inplaceEditData = []
+                  self.gridData.forEach(row => {
+                    if (!row._dirtyFlags && self.defaultDirtyFlags === 'add') {
                       // 如果没有 dirtyFlags，设置默认的flags
-                      row["_guid"] = this.guid()
+                      row["_guid"] = self.guid()
                       row['id'] = null
                       // this.$set(row, "_dirtyFlags", this.defaultDirtyFlags)
                       // if (this.defaultDirtyFlags === "add") {
                       //   this.$set(row, "_guid", this.guid())
                       //   this.$set(row, "id", null)
                       // }
+                    }else {
+                      self.$set(row, "_dirtyFlags", self.defaultDirtyFlags)
+                      console.log('buildEditData=>',self.inplaceEditData,row)
+                      // this.onInplaceEditClicked()
                     }
                   })
+                  self.onInplaceEditClicked()
                 }
                 let child = {
                   name:this.service,
@@ -1606,27 +1650,27 @@ export default {
                 this.$emit("child-loaded",child)
               }
               // console.log(_)
-              this.unmodifiedGridData = _.cloneDeep(this.gridData);
-              if(this.gridData && this.gridData.length >0 && this.gridData[0].hasOwnProperty('_encrypt_cols')){
-                this._encrypt_cols = this.gridData[0]['_encrypt_cols']  // 加密的字段
+              self.unmodifiedGridData = _.cloneDeep(self.gridData);
+              if(self.gridData && self.gridData.length >0 && self.gridData[0].hasOwnProperty('_encrypt_cols')){
+                self._encrypt_cols = self.gridData[0]['_encrypt_cols']  // 加密的字段
               // this.gridData.splice(0, this.gridData.length - 1)
               }else{
-                this._encrypt_cols =  [] // 加密的字段
+                self._encrypt_cols =  [] // 加密的字段
               // this.gridData.splice(0, this.gridData.length - 1)
               }
               
               var listData = response.body.data;
 
-              if (this.gridDataFilter) {
-                let filter = this.gridDataFilter;
+              if (self.gridDataFilter) {
+                let filter = self.gridDataFilter;
                 filter(listData);
               }
 
               listData.forEach(row => {
 
                 // handle sth.
-                for (var key in this.keyValueData) {
-                  var dictData = this.keyValueData[key];
+                for (var key in self.keyValueData) {
+                  var dictData = self.keyValueData[key];
                   for (var map in dictData) {
                     if (row[key] == dictData[map]["value"]) {
                       // row[key] = dictData[map]["text"];  // 0115+
@@ -1636,9 +1680,9 @@ export default {
                 }
 
                 // load child list data for inline list
-                if (this.inlineLists) {
+                if (self.inlineLists) {
                   row._inlineLists = row._inlineLists || {};
-                  this.inlineLists.forEach(inlineList => {
+                  self.inlineLists.forEach(inlineList => {
                     let fk = inlineList.foreign_key;
                     if (!row[fk.referenced_column_name]) {
                       return;
@@ -1649,7 +1693,7 @@ export default {
                       ruleType: "eq",
                       value: row[fk.referenced_column_name],
                     }];
-                    this.select(inlineList.inline_list_select_service, conditions).then(resp => {
+                    self.select(inlineList.inline_list_select_service, conditions).then(resp => {
                       resp.data && resp.data.data && (row._inlineLists[fk.constraint_name] = resp.data.data);
                     })
                   })
@@ -2024,6 +2068,8 @@ export default {
             // service more config 配置 selection 是否为可选择列表，默认为 false
             let moreConfig = JSON.parse(respData.more_config)
             this.moreConfig = moreConfig
+
+            this.buildBatchAddCheck()
             if(this.moreConfig.hasOwnProperty("selection")){
                this.selection = this.moreConfig.selection    // moreConfig 配置有限批量操作 检查
             }else{
@@ -2315,8 +2361,10 @@ export default {
       if(button.button_type !== "_btn_group"){
         let notDeleteOnStandby = !('standby' === row._dirtyFlags && ('delete' === button.button_type))
         let noUpdateDetail4InplaceEdit = !(this.isInplaceEdit() && (button.button_type === 'update' || button.button_type === 'detail' ))
+        // console.log("显示按钮",button.button_type,notDeleteOnStandby && noUpdateDetail4InplaceEdit && button.evalVisible(row))
         return notDeleteOnStandby && noUpdateDetail4InplaceEdit && button.evalVisible(row);
       }else{
+        // console.log("显示按钮 true",true)
         return true
       }
       
@@ -2423,10 +2471,13 @@ export default {
       }
     }
     if(this.listType !== 'treelist'){
+      if(this.listType == 'list' || this.listType == 'treelist'){
+        this.inplaceEditMode = false
+      }
       this.initGridData();
     }
     
-
+    
     if (this.card_no != undefined) {
       this.gridPage.pageSize = 12;
       this.gridPage.pageSizes.push(12);

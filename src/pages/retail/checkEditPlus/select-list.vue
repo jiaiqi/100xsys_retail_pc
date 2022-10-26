@@ -1,39 +1,24 @@
 <template>
   <div>
-    <el-container style="border: 1px solid #eee;padding:10px;">
-      <el-aside style="width:auto">
-        <div style="min-width:250px" class="flex flex-column h-full">
-          <!-- <template v-for="(item, index) in rowButton">
-            <i
-              :key="index"
-              v-if="item.button_type == 'addchild'"
-              @click="rowButtonClick('', '')"
-              class="el-icon-document-add"
-            ></i>
-          </template> -->
-          <div class="button-box flex justify-around" v-if="!selectMode">
-            <el-button
-              type="primary"
-              size="small"
-              v-if="addButton"
-              @click="rowButtonClick(addButton)"
-              >+新增分类</el-button
-            >
-            <!-- <el-button type="primary" size="small">编辑分类</el-button> -->
-          </div>
-          <div class="tree-container flex-1">
-            <!-- <el-input
-              suffix-icon="el-icon-search"
-              style="width:240px"
-              placeholder="输入关键字进行过滤"
-              v-model="filterText"
-            >
-            </el-input> -->
+      <el-row style="padding:30px">
+         <el-col :span="24">
+       <el-input
+    placeholder="请输入内容"
+    suffix-icon="el-icon-full-screen"
+    @keyup.enter.native="onEnter"
+    v-model="searchStr">
+  </el-input></el-col>
+
+      </el-row>
+      <el-row>
+        
+  <el-col :span="6"  v-show="type == 'LAR'">
+     <div class="tree-container flex-1"> 
             <div
               class="text-blue text-700 text-center p-10 cursor-pointer"
               @click="clearCondition"
             >
-              全部商品
+              全部分类
             </div>
             <el-tree
               class="filter-tree"
@@ -46,11 +31,12 @@
               node-key="id"
               @node-click="handleNodeClick"
               ref="tree"
+              style="overflow-y: scroll;height:330px"
             >
               <span class="custom-tree-node" slot-scope="{ node, data }">
                 <span>{{ node.label }}</span>
-                <span @click.stop="">
-                  <el-dropdown v-if="!selectMode">
+                <!-- <span>
+                  <el-dropdown>
                     <span class="el-dropdown-link">
                       <i class="el-icon-s-tools"></i>
                     </span>
@@ -66,135 +52,41 @@
                       </template>
                     </el-dropdown-menu>
                   </el-dropdown>
-                </span>
+                </span> -->
               </span>
             </el-tree>
           </div>
-        </div>
-      </el-aside>
-      <el-main>
-        <div v-if="mainType == 'detail'">
-          <div>
-            <detail
-              :detailshow="detailshow"
-              v-if="showTreeDetail == '1'"
-              form-type="detail"
-              name="tree-node-detail"
-              ref="tree-node-detail"
-              :service="service_name"
-              :pkid="getCurrentCondition()"
-            ></detail>
-          </div>
-
-          <div>
-            <detail
-              :detailshow="detailshow"
-              v-if="showTreeDetail == '2'"
-              form-type="detail"
-              name="tree-node-detail"
-              ref="tree-node-detail"
-              :service="service_name"
-              :pkid="getCurrentCondition()"
-            ></detail>
-          </div>
-        </div>
-        <div v-else-if="mainType == 'list'">
-          <list
+  </el-col>
+  <el-col :span="type == 'LAR'?18:24">
+    <checkList
             ref="list"
-            list-type="list"
+            list-type="selectlist"
+            :readOnly="true"
             :storage-type="storageType"
             :default-condition="listCondition"
-            :service="right_service"
-            :selectMode="selectMode"
+            :service="mainservice"
             @grid-data-changed="$emit('grid-data-changed', $event)"
           >
-            <template #gridHeader v-if="!selectMode">
-              <el-button size="small" type="primary" @click="toAdd" v-if="right_service==='srvretail_goods_info_select'"
-                >+新增商品</el-button
-              >
-              <el-button size="small" type="primary" @click="showBatchUpdate"
-                >批量修改</el-button
-              >
-            </template>
-          </list>
-        </div>
-      </el-main>
-    </el-container>
+          </checkList>
+          </el-col>
+     
+      
 
-    <el-dialog
-      title="添加"
-      width="90%"
-      :close-on-click-modal="1 == 2"
-      :visible="activeForm == 'add-child'"
-      @close="activeForm = 'xx'"
-      append-to-body
-    >
-      <simple-add
-        name="list-add-child"
-        ref="add-child-form"
-        v-if="activeForm == 'add-child'"
-        :submit2-db="!isMem()"
-        :service="getAddService"
-        @submitted2mem="onAdd2MemSubmitted"
-      >
-      </simple-add>
-    </el-dialog>
-    <el-dialog
-      title="编辑"
-      width="90%"
-      :close-on-click-modal="1 == 2"
-      append-to-body
-      :visible="activeForm == 'update'"
-      @close="activeForm = 'xx'"
-    >
-      <bx-update :service="updateService" :pk="id"></bx-update>
-    </el-dialog>
-    <el-dialog
-      title="复制"
-      width="90%"
-      :close-on-click-modal="1 == 2"
-      append-to-body
-      :visible="activeForm == 'duplicate'"
-      @close="activeForm = 'xx'"
-    >
-      <simple-add
-        name="list-duplicate"
-        ref="duplicate-form"
-        v-if="activeForm == 'duplicate'"
-        :service="getAddService"
-        :default-conditions="getDefaultCondition4Duplicate"
-        :submit2-db="storageType == 'db'"
-        @action-complete="onAddFormActionComplete($event)"
-        @form-loaded="onDuplicateFormLoaded"
-        @submitted2mem="onAdd2MemSubmitted"
-      >
-      </simple-add>
-    </el-dialog>
+      </el-row>
 
-    <el-dialog
-      center
-      title="批量修改"
-      width="600px"
-      :close-on-click-modal="1 == 2"
-      append-to-body
-      :visible="activeForm == 'batchUpdate'"
-      @close="activeForm = 'xx'"
-    >
-      <batch-update
-        :multipleSelection="multipleSelection"
-        service="srvretail_goods_info_update"
-        @cancel="activeForm = 'x'"
-        @success="batchUpdateSuccess"
-        v-if="activeForm == 'batchUpdate'"
-      ></batch-update>
-    </el-dialog>
+    
+    <el-row type="flex" class="row-bg" justify="center">
+           <el-button  type="primary" size="small"   @click="onSaveCheck()">确认</el-button>
+            <el-button   type="info" size="small"  @click="onCancelCheck()">取消</el-button>
+      </el-row>
   </div>
 </template>
 
+
+
 <script>
-/**
- * 商品管理
- */
+import checkList from "@/components/common/list";
+import detail from "@/components/common/detail.vue";
 import ChildList from "@/components/common/child-list";
 import SimpleAdd from "@/components/common/simple-add";
 import simpleFilter from "@/components/common/simple-filter";
@@ -203,42 +95,30 @@ import ListPopupMixin from "@/components/mixin/list-popup-mixin";
 import CustButtonMinx from "@/components/mixin/cust-button-minx";
 import MemListMixin from "@/components/mixin/mem-list-mixin";
 
-import List from "./components/list";
-import detail from "./components/detail.vue";
-import BatchUpdate from "./components/batch-update.vue";
-import BxUpdate from "./components/update.vue";
-
 export default {
-  name: "goodsList",
+  name:"selectlist",
   components: {
-    List,
+    checkList: () => import("@/components/common/list.vue"),
     ChildList,
     SimpleAdd,
     SimpleUpdate,
     simpleFilter,
     detail,
-    BatchUpdate,
-    BxUpdate,
   },
   computed: {
     service_name() {
       return this.service || this.$route.query.service_name;
     },
-    right_service() {
-      return (
-        this.rightService ||
-        this.$route.query.right_service ||
-        this.$route.query.mainservice
-      );
+    mainservice() {
+      return this.childservice || this.$route.query.mainservice;
     },
-    addButton() {
-      return this.rowButton.find((item) => item.button_type === "addchild");
+    addButton(){
+      return this.rowButton.find(item=>item.button_type==='addchild')
     },
   },
   data() {
     return {
       listType: "treelist",
-      multipleSelection: [],
       treeData: [],
       showTreeDetail: "",
       currentData: {},
@@ -249,29 +129,31 @@ export default {
       listCondition: [],
       rowButton: [],
       gridButton: [],
-      mainType: "list",
       detailshow: true,
       defaultProps: {
         children: "children",
         label: "",
       },
-      id: "",
-      updateService: "",
-      addService: "",
+      searchStr:""
     };
   },
   mixins: [ListPopupMixin, CustButtonMinx, MemListMixin],
   props: {
-    selectMode: {
-      type: Boolean,
-      default: false,
-    },
     service: {
       type: String,
     },
-    rightService: {
+    childservice: {
       type: String,
     },
+    type:{
+       type: String,
+    },
+    searchColumn:{
+       type: String,
+    },
+    mainType:{
+      type: String,
+    }
   },
   watch: {
     filterText(val) {
@@ -279,28 +161,36 @@ export default {
     },
   },
   methods: {
-    batchUpdateSuccess() {
-      this.activeForm = "x";
-      this.refreshTable();
-    },
-    // 批量编辑弹框
-    showBatchUpdate() {
-      let selectRows = this.getListSelection();
-      if (Array.isArray(selectRows) && selectRows.length > 0) {
-        this.multipleSelection = selectRows;
-        this.activeForm = "batchUpdate";
-      } else {
-        this.$message({ message: "请先勾选要编辑的行", showClose: true });
+    onEnter(){
+      console.log('回车')
+      let defaultCond = []
+      let cond = {
+        colName:this.searchColumn,
+        ruleType:"in",
+        value:this.searchStr
       }
-    },
-    // 跳转到新增页面
-    toAdd() {
-      this.$router.push(`/goods-add?service=srvretail_goods_info_add&title=新增商品`);
-    },
-    getListSelection() {
-      if (this.$refs.list && this.$refs.list.multipleSelection) {
-        return this.$refs.list.multipleSelection;
+      this.currentData = {}
+      if(this.searchStr){
+         this.listCondition.push(cond)
+      }else{
+        
+         this.listCondition = []
       }
+      this.$refs.list.loadTableData();
+      this.searchColumn = ""
+      
+    },
+    onSaveCheck(){
+      let self = this
+      let val = this.$refs.list.getSelectedRows() //getSelectionRowData
+      console.log('选择',val)
+      this.$emit('on-save',val)
+    },
+    onCancelCheck(){
+      let self = this
+      let val = this.$refs.list.getSelectedRows()
+      console.log('选择',val)
+      this.$emit('on-clancel',val)
     },
     refreshTable() {
       if (this.$refs.list && this.$refs.list.loadTableData) {
@@ -310,6 +200,7 @@ export default {
       }
     },
     clearCondition() {
+      this.currentData = {}
       this.listCondition = [];
       this.refreshTable();
     },
@@ -345,9 +236,10 @@ export default {
       ];
     },
     handleNodeClick(data) {
+      console.log("handleNodeClick",data)
       if (this.currentData != data) {
         this.currentData = data;
-        if (this.mainType === "list") {
+        if (this.mainType === "add") {
           this.listCondition = this.buildListCondition();
           this.refreshTable();
         } else {
@@ -409,10 +301,6 @@ export default {
           });
       } else if (item.button_type == "duplicate") {
         this.onDuplicateClicked(row);
-      } else if (item.button_type === "edit") {
-        this.id = row.id;
-        this.updateService = item.service_name;
-        this.activeForm = "update";
       } else {
         this.activeForm = "add-child";
       }
@@ -438,9 +326,6 @@ export default {
                 this.rowButton.push(item);
               } else if (item.button_type == "delete") {
                 item.icon = "el-icon-delete";
-                this.rowButton.push(item);
-              } else if (item.button_type == "edit") {
-                item.icon = "el-icon-edit";
                 this.rowButton.push(item);
               }
             }
@@ -484,7 +369,6 @@ export default {
   },
 };
 </script>
-
 <style scoped lang="scss">
 @import "@/pages/retail/styles/public.scss";
 .el-main {
@@ -512,36 +396,5 @@ export default {
 .tree-container {
   border: 1px solid #eee;
   margin-right: 10px;
-}
-@media only screen and (min-width: 1200px) {
-  ::v-deep .el-col-lg-12 {
-    width: 100% !important;
-  }
-}
-::v-deep .el-col {
-  width: 100% !important;
-}
-::v-deep .field-editor-container {
-  display: flex;
-  flex-wrap: wrap;
-  .input-container {
-    flex: 1;
-    max-width: 800px !important;
-
-    // align-items: center;
-    .el-input {
-      flex: 1;
-      // margin-right: 10px;
-    }
-  }
-  .el-button.custom-button {
-    margin-left: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
-    min-width: 110px;
-  }
-  .el-date-editor {
-    width: 100%;
-  }
 }
 </style>

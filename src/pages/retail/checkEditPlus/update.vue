@@ -6,7 +6,8 @@
       </div>
       <div class="text item">
         <simple-update
-           :approvalFormMode="approvalFormMode"
+          :nav2LocationStr="nav2LocationStr"
+           :approvalFormMode="approvalFormMode" 
            :haveDraft="haveDraft"
            :parentPageType="parentPageType"
           ref="basicForm"
@@ -177,17 +178,106 @@
                   @list-loaded="onChildListLoaded"
                 >
                 </child-list>
+                <!-- <child-list
+                :key="index"
+                ref="childrenList"
+                :name="item.service_name"
+                storage-type="mem"
+                :service="item.service_name"
+                :foreign-key="item.foreign_key"
+                :default-condition="item.defaultCondition"
+                :is-tree="!!item.parent_no_col"
+                :inplace-edit="true"
+                list-type="updatechildlist"
+                :mainFormDatas="mainForm"
+                :default-inplace-edit-mode="false"
+                :merge-col="false"
+                @update-form-loaded="$emit('update-form-loaded', $event)"
+                @add-form-loaded="$emit('add-form-loaded', $event)"
+                @grid-data-changed="onChildListDataChanged"
+                @list-loaded="onChildListLoaded"
+              >
+              </child-list> -->
               </el-collapse-item>
             </template>
           </el-collapse>
          </div>
+      <!-- <template  v-slot:child-body="{ mainForm }" class="text item" v-if="childrenListLoaded">
+        <el-collapse v-model="activeName">
+          <template v-for="(item, index) in childrenList">
+            <el-collapse-item
+              :title="item.foreign_key.section_name || item.foreign_key.table_name"
+              v-show="showChildList(item)"
+              :key="index"
+              :name="index"
+            >
+              <child-list
+                :key="index"
+                ref="childrenList"
+                :name="item.service_name"
+                storage-type="mem"
+                :service="item.service_name"
+                :foreign-key="item.foreign_key"
+                :default-condition="item.defaultCondition"
+                :is-tree="!!item.parent_no_col"
+                :inplace-edit="true"
+                list-type="updatechildlist"
+                :mainFormDatas="mainForm"
+                :default-inplace-edit-mode="false"
+                :merge-col="false"
+                @update-form-loaded="$emit('update-form-loaded', $event)"
+                @add-form-loaded="$emit('add-form-loaded', $event)"
+                @grid-data-changed="onChildListDataChanged"
+                @list-loaded="onChildListLoaded"
+              >
+              </child-list>
+            </el-collapse-item>
+          </template>
+        </el-collapse>
+      </template > -->
+
         </simple-update>
       </div>
+     <!-- <div class="text item" v-if="childrenListLoaded">
+        <el-collapse v-model="activeName">
+          <template v-for="(item, index) in childrenList">
+            <el-collapse-item
+              :title="
+                item.foreign_key.section_name || item.foreign_key.table_name
+              "
+              v-show="showChildList(item)"
+              :key="index"
+              :name="index"
+            >
+              <child-list
+                :key="index"
+                ref="childrenList"
+                :name="item.service_name"
+                storage-type="mem"
+                :service="item.service_name"
+                :foreign-key="item.foreign_key"
+                :default-condition="item.defaultCondition"
+                :is-tree="!!item.parent_no_col"
+                :inplace-edit="true"
+                list-type="updatechildlist"
+                :default-inplace-edit-mode="false"
+                :merge-col="false"
+                @update-form-loaded="$emit('update-form-loaded', $event)"
+                @add-form-loaded="$emit('add-form-loaded', $event)"
+                @grid-data-changed="onChildListDataChanged"
+                @list-loaded="onChildListLoaded"
+              >
+              </child-list>
+            </el-collapse-item>
+          </template>
+        </el-collapse>
+      </div> -->
     </el-card>
   </div>
 </template>
 
 <script>
+// import ChildList from "./child-list.vue";
 import SimpleUpdate from "@/components/common/simple-update.vue";
 import ParentChildMixin from '@/components/mixin/parent-child-mixin'
 
@@ -195,10 +285,14 @@ export default {
   name: "update",
   components: {
     SimpleUpdate,
-    ChildList:() => import("@/components/common/child-list.vue"),
+    ChildList:() => import("./child-list.vue"),
   },
   mixins: [ ParentChildMixin, ],
   props: {
+    nav2LocationStr: {
+      type: String,
+      default: "list"
+    },
     childrenLists:{
       type:Array
     },
@@ -236,12 +330,11 @@ export default {
     },
 
     pkCol: {
-      type: String,
-      default:"id"
+      type: String
     },
 
     pk: {
-      type: [String,Number]
+      type: String
     },
 
     initLoad: {
@@ -276,8 +369,12 @@ export default {
     childDataLoadedRun(e){
       this.$emit("child-loaded",e)
     },
+    getChildGridData:function(){
+      let childs = this.$refs
+    },
     onInnerFormModelChanged: function (e) {
       let self = this
+      // notify child list inplace edit redundant via js
       if (this.$refs && this.$refs.childrenList) {
         this.$refs.childrenList.filter(item => item.isInplaceEdit()).forEach(childlist => {
           let realList = childlist.$refs.list
@@ -302,7 +399,10 @@ export default {
 
       }
       if (e.formModel !== undefined) {
+        //  Vue.set('data', 'mainFormDatas', e.formModel) 
         this.mainFormDatas = e.formModel
+
+        // this.mainFormDatas = e.formModel
       }
 
     },
@@ -359,9 +459,16 @@ export default {
       }
     }
   },
+
   created: function () {
     window.forms = window.forms || {}
     window.forms.update = this
+
   }
+
+
 };
 </script>
+
+
+

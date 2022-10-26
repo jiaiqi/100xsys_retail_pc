@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-dialog title="添加" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'add'" @close="activeForm = 'xx'" append-to-body>
+    <el-dialog  custom-class="bxdialog"  title="添加" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'add'" @close="activeForm = 'xx'" append-to-body>
       <simple-add name="add" ref="add-form" v-if="activeForm == 'add'" :service="service" :default-conditions="defaultConditions" :mainformDatas='listMainFormDatas' :default-condition="defaultCondition"  :childForeignkey='childForeignkey'  :default-values="defaultValues" @action-complete="onActionComplete($event)">
       </simple-add> 
      
@@ -29,22 +29,22 @@
       </add> -->
     </el-dialog>
 
-    <el-dialog title="编辑" width="90%" :close-on-click-modal="1==2"  :visible="activeForm == 'update'" @close="onCloseEvent()" append-to-body>
+    <el-dialog  custom-class="bxdialog"  title="编辑" width="90%" :close-on-click-modal="1==2"  :visible="activeForm == 'update'" @close="onCloseEvent()" append-to-body>
       <simple-update name="update" :appNo="customSrvApp" :init-load="initLoad" ref="update-form" v-if="activeForm == 'update'" :service="service" :default-conditions="defaultConditions" :default-values="defaultValues" @action-complete="activeForm = null">
       </simple-update>
     </el-dialog>
 
-    <el-dialog title="详情" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'detail'" @close="activeForm = 'xx'" append-to-body >
+    <el-dialog  custom-class="bxdialog"  title="详情" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'detail'" @close="activeForm = 'xx'" append-to-body >
       <simple-detail name="detail" ref="detail-form" v-if="activeForm == 'detail'" :service="service" :default-conditions="defaultConditions" :default-values="defaultValues">
       </simple-detail>
     </el-dialog>
 
-    <el-dialog title="列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'list'" @close="activeForm = 'xx'" append-to-body >
+    <el-dialog  custom-class="bxdialog"  title="列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'list'" @close="activeForm = 'xx'" append-to-body >
       <list name="list" ref="list" v-if="activeForm == 'list'" :service="service" :default-condition="defaultConditions" list-type="list">
       </list>
     </el-dialog>
 
-    <el-dialog title="列表" width="90%"
+    <el-dialog  custom-class="bxdialog"  title="列表" width="90%"
                :close-on-click-modal="1==2" :visible="activeForm == 'treegrid'" @close="activeForm = 'xx'"
                append-to-body
     >
@@ -54,14 +54,14 @@
       </treegrid>
     </el-dialog>
 
-    <el-dialog title="编辑列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'editgrid'" @close="activeForm = 'xx'" append-to-body >
+    <el-dialog  custom-class="bxdialog"  title="编辑列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'editgrid'" @close="activeForm = 'xx'" append-to-body >
 
       <edit-grid name="editgrid" ref="editgrid" v-if="activeForm == 'editgrid'" :service="service">
       </edit-grid>
     </el-dialog>
 
     <!--列表加form操作-->
-    <el-dialog title="列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'list_update'" @close="activeForm = 'xx'" append-to-body >
+    <el-dialog  custom-class="bxdialog"  title="列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'list_update'" @close="activeForm = 'xx'" append-to-body >
 
       <simple-update  name="list-update-form" ref="list-update-form" :init-load="1==2" v-if="activeForm == 'list_update'" :service="service" :default-conditions="defaultConditions" :default-values="defaultValues" @action-complete="activeForm = null" @form-loaded="onFormLoaded('update')">
 
@@ -74,7 +74,7 @@
 
 
      <!--选择添加列表-->
-     <el-dialog title="添加列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'selectlist'" @close="activeForm = 'xx'" append-to-body >
+     <el-dialog  custom-class="bxdialog"  title="添加列表" width="90%" :close-on-click-modal="1==2" :visible="activeForm == 'selectlist'" @close="activeForm = 'xx'" append-to-body >
 
         <list name="selectlist" ref="selectlist" v-if="activeForm == 'selectlist'" :service="service" :mapcondition="mapcondition" :default-condition="defaultConditions" list-type="addselectlist"  @action-complete="onListRefresh">
         </list>

@@ -16,15 +16,12 @@
               <el-switch v-else-if="field.info.editor === 'switch'" v-model="field.model" active-color="#13ce66" inactive-color="#777777">
               </el-switch>
 
-              <el-radio-group v-else-if="field.info.moreConfig &&field.info.moreConfig.subtype==='radioGroup' && field.info.editor === 'select'" v-model="field.model" :disabled="getDisabled" @change="$emit('field-value-changed', field.info.name, field)">
-                <el-radio v-for="item in field.optionsFunc()" :key="item.value" :label="item.value">{{item.label}}</el-radio>
-              </el-radio-group>
-        
               <el-select v-else-if="field.info.editor === 'select'" v-model="field.model" :placeholder="field.info.placeholder" clearable :disabled="getDisabled" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
                 <el-option v-for="item in field.optionsFunc()" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
-            
+
+        
 
               <userlist v-else-if="field.info.editor === 'userlist'" :field="field" ref="editor" @field-value-changed="
                   $emit('field-value-changed', field.info.name, field)
@@ -59,16 +56,10 @@
               <el-time-picker v-else-if="field.info.editor === 'time-picker' && field.model !== '******'" :picker-options="{ format: 'HH:mm' }" value-format="HH:mm" v-model="field.model" clearable :disabled="getDisabled" :placeholder="field.info.placeholder" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
               </el-time-picker>
 
-              <el-checkbox-group v-model="field.model"  v-else-if="field.info.moreConfig&&field.info.moreConfig.subtype==='checkboxGroup'&&field.info.editor === 'multiselect'" :disabled="getDisabled"  @change="$emit('field-value-changed', field.info.name, field)">
-                <el-checkbox v-for="item in field.optionsFunc()" :label="item.value" :key="item.value">{{item.label}}</el-checkbox>
-              </el-checkbox-group>
-
               <el-select v-else-if="field.info.editor === 'multiselect'" v-model="field.model" multiple collapse-tags clearable :disabled="getDisabled" :placeholder="field.info.placeholder" @change="$emit('field-value-changed', field.info.name, field)">
                 <el-option v-for="item in field.optionsFunc()" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
-
-          
 
               <!-- range -->
               <el-date-picker v-else-if="field.info.editor === 'date-range'" v-model="field.model" type="daterange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间" clearable :disabled="getDisabled" :placeholder="field.info.placeholder" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
@@ -149,38 +140,45 @@
                 <dynamicSubTemp ref="dynSub" :config="field.info.moreConfig" :field="field" :form="field.form"></dynamicSubTemp>
               </div>
               <!-- default -->
-  
-              <el-input   v-else  :prefix-icon="field.info.moreConfig && field.info.moreConfig.prefixIcon?field.info.moreConfig.prefixIcon:''" :suffix-icon="field.info.moreConfig && field.info.moreConfig.suffixIcon?field.info.moreConfig.suffixIcon:''" v-model="field.model" :placeholder="field.info.placeholder" :disabled="getDisabled" clearable show-word-limit :maxlength="field.info.getMaxLength()" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
-                <template slot="append" v-if="field.info.moreConfig && field.info.moreConfig.appendText">{{ field.info.moreConfig.appendText }}</template>
-                <template slot="prepend" v-if="
-                    field.info.moreConfig && field.info.moreConfig.prependText
-                  ">{{ field.info.moreConfig.prependText }}</template>
-              </el-input> 
-            </div>
-            <el-button class="custom-button" size="small" type="primary" v-if="!getDisabled&&field.info.moreConfig && field.info.moreConfig.rightBtn" @click="handlerCustomButton(field.info.moreConfig.rightBtn)">
-              {{field.info.moreConfig.rightBtn.label}}
-            </el-button>
 
-          </div>
-          <div v-else-if="field.info.editor == 'textarea'" v-show="field.info.bodyVisible" style="border-radius: 4px; border:1px solid #dcdfe6; overflow: auto;white-space: pre-wrap;word-break: break-all;padding:0 15px">{{ field.getDispVal() }}
-          </div>
-          <div v-else-if="field.info.editor == 'extend'">
-            <dynamicSubTemp ref="dynSub" :config="field.info.moreConfig" :field="field" :form="field.form"></dynamicSubTemp>
-          </div>
-          <template v-else>
-            <div class="input-container">
-              <!--只读编辑器-->
-              <a v-if="field.info.linkUrlFunc" v-show="field.getSrvVal()" style="white-space: normal; color: dodgerblue; cursor: pointer;" @click="onLinkClicked()">
-                {{ field.getDispVal4Read() }}
-              </a>
-
-              <el-input v-else readonly :type="field.info.editor === 'Password' ? 'password' : 'text'" v-show="field.info.bodyVisible" :disabled="getDisabled" :value="field.getDispVal4Read()">
+              <el-input v-else v-model="field.model" :placeholder="field.info.placeholder" :disabled="getDisabled" clearable show-word-limit :maxlength="field.info.getMaxLength()" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
                 <template slot="append" v-if="field.info.moreConfig && field.info.moreConfig.appendText">{{ field.info.moreConfig.appendText }}</template>
                 <template slot="prepend" v-if="
                     field.info.moreConfig && field.info.moreConfig.prependText
                   ">{{ field.info.moreConfig.prependText }}</template>
               </el-input>
             </div>
+            <el-button
+              class="custom-button"
+              size="small"
+              type="primary"
+              v-if="
+                !getDisabled &&
+                  field.info.moreConfig &&
+                  field.info.moreConfig.rightBtn
+              "
+              @click="handlerCustomButton(field.info.moreConfig.rightBtn)"
+            >
+              {{ field.info.moreConfig.rightBtn.label }}
+            </el-button>
+          </div>
+          <div v-else-if="field.info.editor == 'textarea'" v-show="field.info.bodyVisible" clsss="detail-border" style="border-radius: 4px; border:1px solid #fff; overflow: auto;white-space: pre-wrap;word-break: break-all;padding:0 15px">{{ field.getDispVal() }}
+          </div>
+          <div v-else-if="field.info.editor == 'extend'">
+            <dynamicSubTemp ref="dynSub" :config="field.info.moreConfig" :field="field" :form="field.form"></dynamicSubTemp>
+          </div>
+          <template v-else>
+            <!--只读编辑器-->
+            <a v-if="field.info.linkUrlFunc" clsss="detail-border" v-show="field.getSrvVal()" style="white-space: normal; color: dodgerblue; cursor: pointer;" @click="onLinkClicked()">
+              {{ field.getDispVal4Read() }}
+            </a>
+
+            <el-input v-else readonly :type="field.info.editor === 'Password' ? 'password' : 'text'" v-show="field.info.bodyVisible" :disabled="getDisabled" :value="field.getDispVal4Read()">
+              <template slot="append" v-if="field.info.moreConfig && field.info.moreConfig.appendText">{{ field.info.moreConfig.appendText }}</template>
+              <template slot="prepend" v-if="
+                  field.info.moreConfig && field.info.moreConfig.prependText
+                ">{{ field.info.moreConfig.prependText }}</template>
+            </el-input>
           </template>
         </template>
 
@@ -314,26 +312,26 @@ export default {
   },
 
   created: function() {
-   
-    this.field.editor = this;
+    this.$set(this.field,'editor',this)
+    // this.field.editor = this;
     
   },
 
   mounted: function() {},
 
   methods: {
-    handlerCustomButton(btn){
+    handlerCustomButton(btn) {
       // 处理moreConfig中配置的自定义按钮
       if (btn.type == "function" && btn.function) {
         // 函数类型 直接修改当前字段的值
         const fun = eval(btn.function);
         const value = fun();
-        if(typeof value === 'string' || typeof value === 'number'){
-          this.field.model = value
-          this.$emit('field-value-changed', this.field.info.name, this.field)
+        if (typeof value === "string" || typeof value === "number") {
+          this.field.model = value;
+          this.$emit("field-value-changed", this.field.info.name, this.field);
         }
-      }else{
-        this.$emit('on-custom-button',btn,this.field)
+      } else {
+        this.$emit("on-custom-button", btn, this.field);
       }
     },
     getShowHelpTips(e) {
@@ -596,8 +594,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-
+<style scoped>
 .help-tips {
   color: #c0c4cc;
   /* position:absolute; */
@@ -656,9 +653,46 @@ export default {
   font-size: 12px;
 }
 </style>
-<style>
+<style lang="scss" scoped>
 .el-input.is-disabled .el-input__inner {
   color: #303133 !important;
+}
+
+
+::v-deep .field-editor-container {
+  display: flex;
+  flex-wrap: wrap;
+  .input-container {
+    flex: 1;
+
+    // align-items: center;
+    .el-input {
+      flex: 1;
+      // margin-right: 10px;
+    }
+  }
+  .el-button.custom-button {
+    margin-left: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    min-width: 110px;
+  }
+  .el-date-editor {
+    width: 100%;
+  }
+}
+::v-deep .el-col {
+  .el-form-item {
+    .el-col {
+      display: flex;
+      div {
+        flex: 1;
+      }
+      .raw_field_editor {
+        flex: 1;
+      }
+    }
+  }
 }
 </style>
 

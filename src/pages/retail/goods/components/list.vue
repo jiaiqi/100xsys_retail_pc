@@ -805,6 +805,9 @@ export default {
   },
 
   methods: {
+    handleSelectionChange(val){
+      this.multipleSelection = val;
+    },
     rowButtonClick(operate_item, row) {
       let self = this;
       let button = operate_item;

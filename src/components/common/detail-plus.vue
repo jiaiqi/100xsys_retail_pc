@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <el-card class="box-card">
+    <!-- <el-card class="box-card"> -->
       <div v-if="!hasVisibleChildListTab()" v-show="detailshow">
         <div slot="header" class="clearfix" v-show="is_view_title">
           <span>{{tab_view_name}}</span>
@@ -58,7 +58,7 @@
           </template>
         </el-collapse>
       </div>
-    </el-card>
+    <!-- </el-card> -->
   </div>
 </template>
 

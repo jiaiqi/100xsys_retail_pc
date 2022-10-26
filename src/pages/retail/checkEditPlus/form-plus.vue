@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <el-card class="" shadow="never"> -->
+    <el-card class="" shadow="never">
       <div class="text item">
         <simple-add
          :approvalFormMode="approvalFormMode" 
@@ -16,14 +16,13 @@
           :defaultCondition='defaultCondition'
           :srvval-form-model-decorator="srvvalFormModelDecorator"
           :parentAddMainFormDatas="parentMainFormDatas"
-          :nav2LocationStr="nav2LocationStr"
           @form-loaded="onAddFormLoaded"
           @srv-config-loaded="onSrvConfigLoaded($event)"
           @form-model-changed="onInnerFormModelChanged($event)"
           @action-complete="$emit('action-complete', $event)"
+          :nav2LocationStr="nav2LocationStr"
           @submitted2mem="onSubmitted2mem"
            @executor-complete="$emit('executor-complete', $event)"
-           @on-custom-button="onCustomButton"
             :childForeignkey='childForeignkey'  
             :childrenLists='childrenList'
         >
@@ -241,38 +240,18 @@
           </template>
         </el-collapse>
       </div> -->
-    <!-- </el-card> -->
-     <el-dialog
-      title="添加"
-      custom-class="bxdialog"
-      :width="dialogWidth(addDialogWidth)"
-      :close-on-click-modal="1 == 2"
-      :visible="activeForm == 'add-child'"
-      @close="activeForm = 'xx'"
-      append-to-body
-    >
-      <simple-add
-        name="list-add-child"
-        ref="add-child-form"
-        :navAfterSubmit="false"
-        v-if="activeForm == 'add-child'"
-        :submit2-db="true"
-        :service="addService"
-        @action-complete="activeForm = null"
-      >
-      </simple-add>
-    </el-dialog>
+    </el-card>
   </div>
 </template>
 
 <script>
-import ChildList from "./child-list.vue";
-import SimpleAdd from "./simple-add.vue";
-import ParentChildMixin from '../mixin/parent-child-mixin'
-import FieldRedundantMixin from '../mixin/field-redundant-mixin'
-
+import ChildList from "./child-list-plus.vue";
+import SimpleAdd from "@/components/common/simple-add.vue";
+import ParentChildMixin from '@/components/mixin/parent-child-mixin'
+import FieldRedundantMixin from '@/components/mixin/field-redundant-mixin'
+ 
 export default {
-  name: "add",
+  name: "form-plus",
   components: {
     SimpleAdd,
     ChildList,
@@ -282,9 +261,13 @@ export default {
     defaultCondition:Array,
     childForeignkey:{
       type:Object
-    },
+    }, 
     service: {
       type: String
+    },
+    nav2LocationStr: {
+      type: String,
+      default: "list"
     },
     defDataPara: {
       type: Object,
@@ -310,10 +293,6 @@ export default {
     navAfterSubmit: {
       type: Boolean,
       default: true,
-    },
-    
-    nav2LocationStr:{
-      type: String,
     },
 
     label: {
@@ -349,20 +328,10 @@ export default {
       activeName: 0,
       mainFormDatas: null,
       srv_more_config: {},
-      addService:"",
-      activeForm:""
     };
   },
 
   computed: {
-     addDialogWidth(){
-      let config = this.srv_more_config||{}
-      let dialogWidth = 8
-      if(config && config.hasOwnProperty('addDialogWidth')){
-        dialogWidth =  config.addDialogWidth || 8
-      }
-      return dialogWidth
-   }
     // mainDefaultValues(){
     //   return this.$parant
     // }
@@ -372,15 +341,6 @@ export default {
     // this.mainFormDatas = this.$emit('main-default-values',this)
   },
   methods: {
-     onCustomButton(btn) {
-      if (btn) {
-        if (btn.type == "add" && btn.service) {
-          this.addService = btn.service;
-          this.activeForm = "add-child";
-        }
-      }
-    },
-
     onSrvConfigLoaded (e) {
       this.srv_more_config = e
     },

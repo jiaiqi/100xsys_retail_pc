@@ -14,9 +14,21 @@
       <add name="list-inner-add" ref="add-form" :service="getAddService" :submit2-db="storageType == 'db'" @action-complete="onAddFormActionComplete($event)" @form-loaded="onAddFormLoaded" @submitted2mem="onAdd2MemSubmitted">
       </add>
     </div>
-
-    <el-row v-show="!hideButtons" type="flex" class="row-bg" justify="end">
+    <el-row v-if="groupByLayoutRun.length > 0" type="flex" class="row-bg-group-layout" justify="left">
+         <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1" v-for="(item,index) in groupByLayoutRun" :key="index">
+           <div class="grid-content bg-purple group-by-layout">
+             {{item.aliasName}}:{{item.value}}{{item.unit}}
+           </div>
+           </el-col>
+    </el-row>
+    <el-row v-show="!hideButtons" type="flex" class="row-bg" justify="space-between" v-if="gridButtonPos == 'top'">
+       <div class="table-head-btns">
+          <el-button type="primary" size="small" v-if="(defaultDirtyFlags == 'add' || listType ==  'updatechildlist') && batchAddButton && batchAddButton.hasOwnProperty('batchAdd') && batchAddButton.batchAdd.isDisp" @click.stop="onBatchAddCheckButton()">
+            {{batchAddButton.batchAdd.buttonName}}
+          </el-button>
+        </div>
       <div class="table-head-btns">
+       
         <template v-for="(item, index) in sortedGridButtons">
           <el-button :key="index" :size="item._moreConfig.size" :type="selectFormShow && item.button_type === 'select' ? 'success' : item._moreConfig.type " :icon="item._moreConfig.icon" :round="item._moreConfig.style !== '' &&  item._moreConfig.style === 'round'" :plain="item._moreConfig.style !== '' && item._moreConfig.style === 'plain'" :circle="item._moreConfig.style !== '' && item._moreConfig.style === 'circle'" v-show="item.evalVisible()" :disabled="item.evalDisable()" v-if="(!readOnly && existsGridButton && item.permission && getDispExps(item)) || !item.permission && item.hasOwnProperty('always_show') && item.always_show === true" @click="gridButtonClick(item)">
             {{item.button_name}}
@@ -40,20 +52,22 @@
 
       <div v-else>
         <el-row type="flex" class="row-bg" justify="center">
-          <el-table :data="gridDataRun" stripe border style="width: 100%" :row-class-name="tableRowClassName" row-key="id" highlight-current-row @selection-change="handleSelectionChange" @filter-change="filterChange" :sortable="tabBasicsConfig.sortable" @sort-change="handleSortChange" @row-dblclick="onRowDbClicked">
-            <el-table-column type="selection" label="全选" header-align="left" width="50px" v-if="selection && !readOnly">
+          <el-table header-row-class-name="header-row" :data="gridDataRun" stripe border style="width: 100%" :row-class-name="tableRowClassName" row-key="id" highlight-current-row @selection-change="handleSelectionChange" @filter-change="filterChange" :sortable="tabBasicsConfig.sortable" @sort-change="handleSortChange" :show-summary="getShowTableSummary()" :summary-method="onSummaryMethod" @row-dblclick="onRowDbClicked">
+            <el-table-column type="selection" label="全选" header-align="left" width="50px" v-if="(selection && !readOnly) || listType=='selectlist'">
             </el-table-column>
             <!-- v-if="(item.show && (!item.evalVisible || item.evalVisible()))" ---↓-->
             <el-table-column v-for="(item, index) in gridHeader" :key="index" header-align="left" v-if="getGridHeaderDispExps(item,listMainFormDatas)" :width="item.width ? item.width : getListShowFileList(item) ? item.list_min_width ? item.list_min_width : 180 : ''" :filter-method="item.filters && tabBasicsConfig.sortable ? filterHandler : null" :prop="item.column" :align="item.align" :fixed="item.rowFixed ? true : null" :show-overflow-tooltip="getListShowFileList(item) === true ? false : true" :label="item.label" :min-width="item.list_min_width + 'px'"  :column-key="item.column" :sortable="tabBasicsConfig.sortable && item.sortable && !isMem() ? 'custom' : false">
               <template slot-scope="scope">
-                <div v-if="isInplaceEdit()  && findEditField(scope.row, item.column)" class="is-InplaceEdit">
-                  <!-- <raw-field-editor :field="findEditField(scope.row, item.column)"
+                <!-- v-if="isInplaceEdit()  &&findEditField(scope.row, item.column)" -->
+                <div v-if="(listType == 'addchildlist' || listType == 'updatechildlist') && item.srvcol.hasOwnProperty('updatable') && item.srvcol.updatable == 1" class="is-InplaceEdit">
+                  <raw-field-editor v-if="findEditField(scope.row, item.column)" :field="findEditField(scope.row, item.column)"
                           @field-value-changed="onCellValueChanged(scope.row, item.column)"
                           @blur="onCellBlur(scope.row, item.column)">
-                    </raw-field-editor> -->
-                  {{formatValue(scope.row, item)}}
+                    </raw-field-editor>
+                  <!-- {{formatValue(scope.row, item)}} -->
                 </div>
-                <div v-else-if="item.col_type === 'progress'">
+                <div v-else-if="item.col_type === 'progress'">  
+                    <!-- 进度条 -->
                   <el-progress :text-inside="true" :stroke-width="18" :percentage="scope.row[item.column]"></el-progress>
                 </div>
                 <!-- Enum | Dict 根据配置显示图标 -->
@@ -66,9 +80,7 @@
                   <img v-if="scope.row[item.column]" :src="serviceApi(scope.row[item.column]).downloadFileNo+scope.row[item.column]" />
                 </div>
 
-                <!-- <div v-else-if="item.col_type === 'FileList'">
-                    <upload-file :field="wrapCellIntoField(item.column, scope.row[item.column])"></upload-file>
-                  </div> 1116隐藏-->
+              
                 <div v-else-if="item.col_type === 'FileList' && getListShowFileList(item)" class="list-image">
                   <div :title="fileItem.src_name" v-for="(fileItem,index) in getListFileDatas(item,scope.row)" :key="index">
                     <i v-show="getFileType(fileItem) === 'img' || getFileType(fileItem) === 'pdf'" class="el-icon-view" @click.stop="onPreView(fileItem,index,getListFileDatas(item,scope.row))">
@@ -108,7 +120,7 @@
 
             </el-table-column>
 
-            <el-table-column label="操作" header-align="left" width="240" fixed="right" v-if="!readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
+            <el-table-column label="操作" header-align="left" width="240" fixed="right" v-if="isShowRowButtons && !readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
               <template slot-scope="scope">
                 <!-- <el-button v-for="(button, index) in sortedRowButtons"
                             :key="index"
@@ -162,30 +174,51 @@
         </el-row>
 
       </div>
+      <el-row v-show="!hideButtons" type="flex" class="row-bg" justify="space-between" v-if="gridButtonPos == 'bottom'">
+       <!-- <div class="table-head-btns">
+          <el-button type="primary" size="small" v-if="(defaultDirtyFlags == 'add' || listType ==  'updatechildlist') && batchAddButton && batchAddButton.hasOwnProperty('batchAdd') && batchAddButton.batchAdd.isDisp" @click.stop="onBatchAddCheckButton()">
+            {{batchAddButton.batchAdd.buttonName}}
+          </el-button>
+        </div> -->
+      <div class="table-head-btns">
+       
+        <template v-for="(item, index) in sortedGridButtons">
+          <el-button :key="index" :size="item._moreConfig.size" :type="selectFormShow && item.button_type === 'select' ? 'success' : item._moreConfig.type " :icon="item._moreConfig.icon" :round="item._moreConfig.style !== '' &&  item._moreConfig.style === 'round'" :plain="item._moreConfig.style !== '' && item._moreConfig.style === 'plain'" :circle="item._moreConfig.style !== '' && item._moreConfig.style === 'circle'" v-show="item.evalVisible()" :disabled="item.evalDisable()" v-if="(!readOnly && existsGridButton && item.permission && getDispExps(item)) || !item.permission && item.hasOwnProperty('always_show') && item.always_show === true" @click="gridButtonClick(item)">
+            {{item.button_name}}
+          </el-button>
 
+        </template>
+      </div>
+
+      <!-- <div>
+            <el-button  @click="gridButtonClick({'button_type':'export'})">
+                导出测试
+              </el-button>
+          </div> -->
+    </el-row>
       <!-- <el-row type="flex" class="row-bg" justify="center" v-if="!isMem()" -->
       <el-row type="flex" class="row-bg" justify="center" v-if="showPagination" v-show="!hidePagination && gridPage.total>0">
 
-        <el-pagination @current-change="handleCurrentChange" @size-change="handleSizeChange" :current-page="gridPage.currentPage" :page-sizes="gridPage.pageSizes" :page-size="gridPage.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="gridPage.total">
+        <el-pagination background @current-change="handleCurrentChange" @size-change="handleSizeChange" :current-page="gridPage.currentPage" :page-sizes="gridPage.pageSizes" :page-size="gridPage.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="gridPage.total">
         </el-pagination>
 
       </el-row>
     </div>
-    <el-dialog title="添加" width="90%" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'add'" @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="添加" :width="dialogWidth(listDialogWidth)" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'add'" @close="activeForm = 'xx'">
       <add name="list-add" ref="add-form" v-if="activeForm == 'add'" :service="getAddService" :submit2-db="storageType == 'db'" :defaultCondition='defaultCondition' :form-model-decorator="formModelDecorator" :defaultValues="listMainFormDatas" :haveDraft="isDraft" :pageIsDraft="activeTabName" :childForeignkey="childForeignkey" :parentPageType="listType" :parentMainFormDatas="listMainFormDatas" @action-complete="onAddFormActionComplete($event)" @form-loaded="onAddFormLoaded" @submitted2mem="onAdd2MemSubmitted">
       </add>
     </el-dialog>
-    <el-dialog title="复制" width="90%" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'duplicate'" @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="复制" width="90%" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'duplicate'" @close="activeForm = 'xx'">
       <simple-add name="list-duplicate" ref="duplicate-form" :pageName="'list-duplicate'" v-if="activeForm == 'duplicate'" :service="getAddService" :default-conditions="getDefaultCondition4Duplicate" :submit2-db="storageType == 'db'" :parentPageType="listType" :defaultValues="activeData"  :parentMainFormDatas="listMainFormDatas" @action-complete="onAddFormActionComplete($event)" @form-loaded="onDuplicateFormLoaded" @submitted2mem="onAdd2MemSubmitted">
       </simple-add>
     </el-dialog>
 
-    <el-dialog title="深度复制" width="90%" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'duplicatedeep'" @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="深度复制" width="90%" :close-on-click-modal="1==2" append-to-body :visible="activeForm == 'duplicatedeep'" @close="activeForm = 'xx'">
       <add name="list-duplicatedeep" ref="duplicatedeep-form" v-if="activeForm == 'duplicatedeep'" :service="getAddService" :default-conditions="getDefaultCondition4DuplicateDeep" :submit2-db="storageType == 'db'" :parentPageType="listType" :haveDraft="isDraft" :pageName="'list-duplicatedeep'" :parentMainFormDatas="listMainFormDatas" :pageIsDraft="activeTabName" :defaultValues="activeData" @action-complete="onAddFormActionComplete($event)" @form-loaded="onDuplicateFormLoaded" @submitted2mem="onAdd2MemSubmitted">
       </add>
     </el-dialog>
 
-    <el-dialog title="编辑" width="90%" :visible="activeForm == 'update'" :close-on-click-modal="1==2" append-to-body @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="编辑" :width="dialogWidth(listDialogWidth)" :visible="activeForm == 'update'" :close-on-click-modal="1==2" append-to-body @close="activeForm = 'xx'">
     
       <update name="list-update" ref="update-form" v-if="activeForm == 'update' " :service="getUpdateService" :pk="getClickedRowPk('update')" :pageIsDraft="activeTabName" :initLoad="initLoad" :defaultValues="clickedRow['update']" :submit2-db="storageType == 'db'" :parentPageType="listType" :haveDraft="isDraft" :parentMainFormDatas="listMainFormDatas" :override-data="clickedRow.update._dirtyFlags ? clickedRow.update : null" @action-complete="onUpdateFormActionComplete($event)" @form-loaded="onUpdateFormLoaded($refs['update-form'])" @submitted2mem="onUpdate2MemSubmitted">
       </update>
@@ -201,22 +234,22 @@
       </simple-update> -->
     </el-dialog>
 
-    <el-dialog title="导入" width="90%" :visible="activeForm == 'import'" append-to-body @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="导入" width="90%" :visible="activeForm == 'import'" append-to-body @close="activeForm = 'xx'">
       <import-dialog :service="addService" :sign-service-name="addService" v-if="activeForm == 'import'" :button="actionGridButton" @close="onImportDialogClosed">
       </import-dialog>
     </el-dialog>
-    <el-dialog title="自定义导入" width="90%" :visible="activeForm == 'customizeImport'" append-to-body @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="自定义导入" width="90%" :visible="activeForm == 'customizeImport'" append-to-body @close="activeForm = 'xx'">
       <import-dialog :service="importService" :sign-service-name="addService" :importPageType="'customize'" v-if="activeForm == 'customizeImport'" :button="actionGridButton" @close="onImportDialogClosed">
       </import-dialog>
     </el-dialog>
-    <el-dialog title="导出" width="90%" :visible="activeForm ==  'export'" append-to-body @close="onExportDialogClosed">
+    <el-dialog  custom-class="bxdialog" title="导出" width="90%" :visible="activeForm ==  'export'" append-to-body @close="onExportDialogClosed">
       <exportLayout :columns="gridHeader" :type="'exprot'" @on-export-clicked="onExportClicked($event)"></exportLayout>
     </el-dialog>
-    <el-dialog title="管理子表" width="90%" :visible="activeForm == 'manageChildList'" append-to-body @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" title="管理子表" width="90%" :visible="activeForm == 'manageChildList'" append-to-body @close="activeForm = 'xx'">
       <popup-mem-list list-type="detaillist" name="inlinelist" v-if="activeForm == 'manageChildList'" ref="inlineList" :service="props4ActivePopupMemList.inline_list_select_service" :foreign-key="props4ActivePopupMemList.foreign_key" :read-only="false" :search-form="false" :is-tree="false" :inplace-edit="true" :should-load-from-db="false" @list-loaded="onPopupMemListLoaded" @close-pop="activeForm = 'xx'">
       </popup-mem-list>
     </el-dialog>
-    <el-dialog ref="batchApprove" title="审批" width="90%" :visible="activeForm == 'batchApprove'" append-to-body @close="activeForm = 'xx'">
+    <el-dialog  custom-class="bxdialog" ref="batchApprove" title="审批" width="90%" :visible="activeForm == 'batchApprove'" append-to-body @close="activeForm = 'xx'">
       <batchApprove @action-success="actionSuccess()" :approvaList="approvaList" :approvalOptions="approvalOptions">测试</batchApprove>
     </el-dialog>
 
@@ -229,7 +262,7 @@
 
       <img style="height:1rem;width:1rem;" :class="'image-'+ src.id" @error="onerror" @load="onerror(src.url)" :src="src.url" v-for="(src,index) in imagesListRun" :key="index">
     </viewer>
-    <el-dialog custom-class="preview-dialog" :title="currentType === 'pdf' ? '第'+currentPage+'页/共'+pageCount+'页' : '预览'" :visible.sync="centerDialogVisible" width="50%" lock-scroll center>
+    <el-dialog   custom-class="preview-dialog bxdialog" :title="currentType === 'pdf' ? '第'+currentPage+'页/共'+pageCount+'页' : '预览'" :visible.sync="centerDialogVisible" width="50%" lock-scroll center>
 
       <el-row type="flex" align="middle" v-if="currentType === 'pdf'">
         <el-col :span="2" class="grid-content">
@@ -255,6 +288,10 @@
       </el-row>
 
       <!-- <el-image v-else  :src="currentUrl" lazy></el-image> -->
+    </el-dialog>
+     <el-dialog  custom-class="bxdialog"  title="选择" width="90%" :visible="batchCheckDialogVisible" append-to-body @close="batchCheckDialogVisible = false">
+       
+        <batch-edit-list-select  ref="check-list" :mainType="'add'" :searchColumn="batchAddButton && batchAddButton.hasOwnProperty('batchAdd') ? batchAddButton.batchAdd.searchColumn : ''" :service="batchAddButton && batchAddButton.hasOwnProperty('batchAdd') ? batchAddButton.batchAdd.service : ''" :childservice="batchAddButton && batchAddButton.hasOwnProperty('batchAdd') ? batchAddButton.batchAdd.childservice : ''" @on-save="onSelectSave($event)" @on-clancel="onSelectClancel($event)" :type="batchAddButton && batchAddButton.hasOwnProperty('batchAdd') ? batchAddButton.batchAdd.type : 'list'"></batch-edit-list-select>
     </el-dialog>
   </div>
 </template>
@@ -282,13 +319,16 @@ import batchApprove from "../ui/batch-approve.vue"; // 流程审批
 import pdf from "vue-pdf";
 import CMapReaderFactory from "vue-pdf/src/CMapReaderFactory.js";
 
+// 批量编辑列表场景 扩展 10-18
+import batchEditList from "@/components/mixin/batch-edit-child-list-mixin.js";
+import batchEditListSelect from "@/pages/retail/checkEditPlus/select-list.vue";
 export default {
   name: "list",
   components: {
     PopupMemList,
     UploadFile,
     ImportDialog,
-    SimpleUpdate,
+    SimpleUpdate, 
     SimpleAdd,
     simpleFilter,
     simpleCard,
@@ -297,7 +337,8 @@ export default {
     exportLayout,
     update: () => import("../common/update.vue"),
     Add: () => import("../common/add.vue"),
-    batchApprove
+    batchApprove,
+    batchEditListSelect
   },
   props: {
     childForeignkey: Object,
@@ -309,7 +350,8 @@ export default {
     CustButtonMinx,
     MemListMixin,
     FieldRedundantMixin,
-    ListMixin
+    ListMixin,
+    batchEditList
   ],
   data() {
     return {

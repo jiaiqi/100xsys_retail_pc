@@ -533,7 +533,7 @@ export default {
         if(_tab_title==null||_tab_title==""||_tab_title==undefined){
           _tab_title=item.button_name;
         }
-        this.forwardAddTab(address, item.service_view_name,item);
+        this.forwardAddTab(address, _tab_title,item);
       }
 
       

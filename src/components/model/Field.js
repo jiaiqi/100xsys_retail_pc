@@ -160,7 +160,7 @@ export class Field {
     }else {
       this.model = srvVal;
       // 如果原始值为 “” || null 时 调用默认值配置表达式，有的话则复制
-      if((srvVal === "" || srvVal === null || srvVal === undefined) && this.hasInitValueExpr()){
+      if((srvVal === "" || srvVal === null || srvVal === undefined) && this.hasInitValueExpr() &&  (this.evalInitValueExpr() == 0 || this.evalInitValueExpr()) ){
         this.model = this.setSrvVal(this.evalInitValueExpr())
         console.log("默认值",srvVal,this.model,this.setSrvVal(this.evalInitValueExpr()))
       } 
@@ -329,11 +329,14 @@ export class Field {
   evalVersatileFlagVar(flagVar) {
     let vm = this.form;
     let formModel = vm.srvValFormModel && vm.srvValFormModel();
-
+    let mainData = {}
+    if(typeof(flagVar) ==='string' && flagVar.indexOf('mainData')){
+      mainData = this.parentMainFormDatas
+    }
     if (_.isBoolean(flagVar)) {
       return flagVar;
     } else if (_.isString(flagVar)) {
-      return vm.evalBxExpr(flagVar, formModel, vm);
+      return vm.evalBxExpr(flagVar, formModel, vm,mainData);
       // 运行字符串表达式
     } else if (_.isFunction(flagVar)) {
       return flagVar(formModel);

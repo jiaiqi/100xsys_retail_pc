@@ -1,8 +1,8 @@
 /* */
 <template>
   <div v-if="pk && service_name">
-    <nav-bar>{{ title || "" }}</nav-bar>
-    <bx-update :service="service_name" :pk="pk"></bx-update>
+    <!-- <nav-bar>{{ title || "修改" }}</nav-bar> -->
+    <bx-update :service="service_name" :pk="pk" :pkCol="pkCol"></bx-update>
   </div>
 </template>
 
@@ -10,7 +10,7 @@
 /**
  * 商品编辑
  */
-import BxUpdate from "./components/update.vue";
+import BxUpdate from "@/components/common/update.vue";
 import NavBar from "./components/nav-bar.vue";
 export default {
   name: "goods-update",
@@ -19,7 +19,7 @@ export default {
     BxUpdate,
   },
   props: {
-    pkCol: {
+    idCol: {
       type: String,
       default: "id",
     },
@@ -38,11 +38,18 @@ export default {
     title() {
       return this.$route.query.title;
     },
+
     pk() {
-      return this.$route.query.id || this.id;
+      return this.$route.params.pk || this.$route.query.id || this.id;
     },
+
+    pkCol() {
+      return this.$route.params.pkCol || this.$route.query.pkCol || this.$route.query.idCol || this.idCol;
+    },
+
     service_name() {
       return (
+        this.$route.params.service_name||
         this.service ||
         this.$route.query.service_name ||
         this.$route.query.service

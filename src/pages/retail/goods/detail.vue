@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav-bar>商品详情</nav-bar>
+    <nav-bar>{{title||'详情'}}</nav-bar>
     <bx-detail :service="service" :pkid="id" v-if="id"></bx-detail>
   </div>
 </template>
@@ -9,7 +9,7 @@
 /**
  * 商品详情
  */
-import bxDetail from "./components/detail";
+import bxDetail from "@/components/common/detail";
 import NavBar from "./components/nav-bar.vue";
 
 export default {
@@ -21,11 +21,13 @@ export default {
     return {
       id: "",
       service: "",
+      title:"",
     };
   },
   created() {
     this.id = this.$route.query.id;
     this.service = this.$route.query.service;
+    this.title = this.$route.query.title;
   },
 };
 </script>
