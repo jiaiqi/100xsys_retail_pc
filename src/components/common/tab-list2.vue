@@ -216,7 +216,7 @@
         this.onInputValue = e
         if(e && self.$refs.filterTabs){
           let tabsConds = self.$refs.filterTabs.buildConditions()
-          this.relationCondition = tabsConds
+          self.relationCondition = tabsConds
         }
       },
       onReset(){
@@ -451,10 +451,11 @@
               inputType:null
             }
             let mc = JSON.parse(t.more_config)
-            tab.more_config = mc
+            // console.log("JSON.parse",t.more_config,JSON.parse(t.more_config))
+            tab.more_config = JSON.parse(t.more_config)
             tab.service = t.service
             tab.table_name = t.table_name
-            tab.conditions = t.conditions
+            tab.conditions = mc.option_list ? mc.option_list.conditions : null || []
             tab.orders = t.orders
             tab.default = mc.default
             tab.seq = t.seq
@@ -463,7 +464,7 @@
             tab._data = t
             tab._options = []
             tab._type = mc.type || null
-            tab.option_list = mc.option_list || null
+            tab.option_list = JSON.parse(t.more_config).option_list || null
             tab._colName = mc.colName || null
             tab.inputType = mc.inputType || null
             tab.showAllTag = mc.showAllTag || false
@@ -488,11 +489,14 @@
             }
             if(tab.inputType == 'fk'){
              let cond=[
-              {"colName": tab.option_list.key_disp_col,
-            "ruleType": "[like]",
-            "value": ''}
-          ]
-          let options =[]
+                  {"colName": tab.option_list.key_disp_col,
+                "ruleType": "[like]",
+                "value": ''}
+              ]
+              cond = cond.concat(tab.option_list ? tab.option_list.conditions : [])
+          // cond.push(tab.option_list.conditions)
+              console.log("build option ",tab)
+              let options =[]
               self.select(tab.option_list.serviceName, cond, null, null, null, null,null, null, null, null,false).then((res) =>{
               let resData = res.data.data
                 for(let i =0;i<resData.length;i++){

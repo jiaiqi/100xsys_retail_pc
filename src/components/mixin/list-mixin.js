@@ -857,7 +857,7 @@ export default {
       if (button.action_validate && this.evalActionValidator(button.action_validate, this.gridData) !== true) {
         return;
       }
-
+      
       if ("select" == type) {
         self.toggleFilters(button);
       } else if ("extjs" === type) {
@@ -981,13 +981,19 @@ export default {
         //批量添加
 
       } else if ("batchupdate" == type) {
-
+        // 批量修改
         if (this.header_view_model != 'normal') {
           this.header_view_model = "normal";
           this.gridHeader = this.noramlHeaders;
         }
-
-        this.onInplaceEditClicked();
+        if (this.multipleSelection.length == 0) {
+          this.$alert("请选择需要编辑的数据", "提示", {
+            confirmButtonText: "确定"
+          });
+        }else{
+          this.activeForm = 'batchupdate'
+        }
+        // this.onInplaceEditClicked();
       } else if ("saveall" == type) {
         this.onSaveAllClicked();
       } else if ("apply" == type) {

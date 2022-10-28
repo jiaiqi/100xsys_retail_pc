@@ -88,7 +88,7 @@ import vipSet from '@/pages/retail/goods/vipSet.vue'
 import test_field from '@/components/test/test_field'
 // const excelEditView = ()=>import("@/components/common/luckysheet.vue")
 // 权限设置
-import authority from '@/pages/authority.vue'
+import authorityPage from '@/pages/authority.vue'
 // pages
 Vue.use(Router)
 Vue.use(VueResource)
@@ -361,9 +361,9 @@ export default new Router({
       component: vipSet ,
     },
     {
-      path: '/authority/:type/:role_no',
-      name: 'authority',
-      component: authority ,
+      path: '/authorityPage/:type/:role_no',
+      name: 'authorityPage',
+      component: authorityPage ,
     }
   ]
 })

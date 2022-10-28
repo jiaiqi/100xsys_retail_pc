@@ -670,7 +670,7 @@ Vue.prototype.word2number = function(w,type){
   /**操作*/
   Vue.prototype.operate = function (requests) {
     let service = requests.length > 0 ? requests[0].serviceName : "";
-    let srvApp = requests[0].srvApp;
+    let srvApp = requests[0].srvApp || this.resolveDefaultSrvApp();
     var url = this.getServiceUrl("operate", service, srvApp);
     return this.$http.post(url, requests);
   };

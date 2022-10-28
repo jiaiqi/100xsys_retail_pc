@@ -16,7 +16,7 @@
       >
       </add>
       <treegrid
-        grid-button-justify="start"
+        grid-button-justify="end"
         v-else-if="tab.type === 'treelist'"
         ref="list"
         :name="'tab' + index"

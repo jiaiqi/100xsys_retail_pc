@@ -148,6 +148,17 @@
                   ">{{ field.info.moreConfig.prependText }}</template>
               </el-input>
             </div>
+            
+            <div style="line-height:40px;" :span="2" v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" class="help-tips">
+              
+              <el-popover 
+              placement="bottom" 
+              width="200" 
+              trigger="hover" 
+              :content=" field.info.moreConfig && field.info.moreConfig.help_tips ? field.info.moreConfig.help_tips : ''">
+                <i slot="reference" class="el-icon-question" style="color:#444;font-size:16px"></i>
+              </el-popover>
+            </div>
             <el-button
               class="custom-button"
               size="small"
@@ -193,9 +204,10 @@
           <i v-if="field.getUniqueCheckMsg().state === 'loading'" style="color:orange" class="el-icon-loading"></i>
           <i v-if="field.getUniqueCheckMsg().state === 'UniqueCheckError'" style="color:red" class="el-icon-error"></i>
           <i v-if="field.getUniqueCheckMsg().state === 'UniqueCheckOk'" style="color:green" class="el-icon-success"></i>
-        </el-tooltip>
+        </el-tooltip> 
       </el-col>
       <!-- //v-show="field.hasHistoryData()" -->
+      
       <el-col v-show="field.hasHistoryData()" :span="2">
         <!--显示历史数据按钮-->
         <div>
@@ -222,14 +234,14 @@
             {{ field.getAnyValidatePrompt() }}
           </span>
         </div>
-        <div v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" :title="field.info.moreConfig && field.info.moreConfig.help_tips ? field.info.moreConfig.help_tips : ''" class="help-tips">
-          <!-- v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" -->
+        <!-- <div v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" :title="field.info.moreConfig && field.info.moreConfig.help_tips ? field.info.moreConfig.help_tips : ''" class="help-tips">
+          
           <el-popover placement="bottom" width="200" trigger="hover" :content=" field.info.moreConfig && field.info.moreConfig.help_tips ? field.info.moreConfig.help_tips : ''">
             <i slot="reference" class="el-icon-question" style="color:#03a2ff;font-size:12px"></i>
           </el-popover>
           <span v-show="field.info.moreConfig && field.info.moreConfig.help_tips" style="color:#03a2ff;font-size:12px"> {{field.info.moreConfig && field.info.moreConfig.help_tips ? field.info.moreConfig.help_tips : ''}}</span>
-          <!-- --- -->
-        </div>
+          
+        </div> -->
       </el-col>
 
     </el-row>

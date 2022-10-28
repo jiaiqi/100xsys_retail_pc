@@ -95,9 +95,8 @@
             @field-history-popup="$emit('field-history-popup', $event)"
           >
           </raw-field-editor>
-
+          
         </el-col>
-
       </el-row>
     </el-form-item>
     <slot name="field-child-append"></slot>

@@ -5,8 +5,8 @@
             
             <div v-if="tab._type === 'input'">
                 <el-row :gutter="5">
-                    <el-col :span="6">
-                        <el-input col="2" :placeholder="tab.placeholder + tab.label" clearable :name="tab.list_tab_no" v-model="formModel[tab.list_tab_no].value"></el-input>
+                    <el-col>
+                        <el-input  :placeholder="tab.placeholder + tab.label" clearable :name="tab.list_tab_no" v-model="formModel[tab.list_tab_no].value"></el-input>
                     </el-col>
                     <!-- <el-col :span="6">
                         <el-radio-group :disabled="formModel[tab.list_tab_no].value == ''" v-model="inputMoreConfig.value">
@@ -18,13 +18,31 @@
                 </el-row>
             </div>
             <div v-if="tab._type === 'between'">
-                <el-col :span="11">
+                <el-col :span="11" v-if="tab.inputType == 'BetweenDate'">
+                    <el-date-picker
+                        v-model="formModel[tab.list_tab_no].value"
+                        type="datetimerange"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        >
+                     </el-date-picker>
+                    <!-- <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker> -->
+                </el-col>
+                <!-- <el-col :span="11">
+                    <el-date-picker
+                        v-model="value1"
+                        type="datetimerange"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :default-time="['12:00:00']">
+                     </el-date-picker>
                     <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
                 </el-col>
                 <el-col class="line" :span="2">-</el-col>
                 <el-col :span="11">
                     <el-time-picker placeholder="选择时间" v-model="form.date2" style="width: 100%;"></el-time-picker>
-                </el-col>
+                </el-col> -->
             </div>
             <div  v-if="tab._type === 'select'">
                 <selectPlus :ref="tab.list_tab_no" :placeholder="tab.placeholder + tab.label" :tab="tab" :formModel="formModel[tab.list_tab_no]" @on-value-change="selectChange($event)"></selectPlus>
@@ -193,6 +211,9 @@ export default {
                   col.value = ""
                   col.options = item['_options']
                 model[item.list_tab_no] =col
+              }else if(item._type === 'between' && item.inputType == 'BetweenDate'){
+                  col.value = []
+                    model[item.list_tab_no] =col
               }
           })
           self.formModel = model
@@ -336,7 +357,7 @@ export default {
                                 }
                             }
                         }
-                  }else if(tab.inputType === 'BetweenNumber' || tab.inputType === 'Date'  || tab.inputType === 'DateTime'  || tab.inputType === 'String'){
+                  }else if(tab.inputType === 'BetweenDate' || tab.inputType === 'BetweenNumber' || tab.inputType === 'Date'  || tab.inputType === 'DateTime'  || tab.inputType === 'String'){
                       tab['value'] = []
                         options = []
                         let opts = tab.more_config.tags
@@ -440,8 +461,7 @@ export default {
                 "page": {
                     "pageNo": 1,
                     "rownumber": 10
-                },
-                "order": []
+                }
             }
             let relation_Conditions={
                 "relation": "AND",
@@ -471,7 +491,7 @@ export default {
                 if((condsModel[tabs[i]].formType === 'checkbox' || 
                 condsModel[tabs[i]].formType === 'radio') && 
                 condsModel[tabs[i]].value.length !== 0 && condsModel[tabs[i]].value[0] !== '_unlimited_'){
-                    if(condsModel[tabs[i]].inputType === 'BetweenNumber' || condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime'){
+                    if(condsModel[tabs[i]].inputType === 'BetweenNumber' || condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime'  || condsModel[tabs[i]].inputType === 'BetweenDate'){
                         relation.relation = 'AND'
                         relation.data = []
                         let values = condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime' ?  self.formatDateValues(condsModel[tabs[i]].value) : condsModel[tabs[i]].value 
@@ -482,31 +502,32 @@ export default {
                                     ]
                             }
 
-                            let betval =  values[v].split(",")
+                            let betval = condsModel[tabs[i]].inputType === 'BetweenDate' ? values[v] : values[v].split(",")
                             for(let j=0;j<betval.length;j++){
-                                colData = {
-                                    "colName":"",
-                                    "ruleType":"",
-                                    "value":""
-                                }
-                                if(betval[j] !== '-'){
-                                    if(j===0 && betval[j] !== '-'){
-                                    colData.colName = condsModel[tabs[i]].colName[0]
-                                    colData.value =  condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime' ? betval[j] :Number(betval[j])
-                                    colData.ruleType = betval.length > 1 ? "ge" : "like"  // 只有一个只时候 按照 like 查询
-                                    
-                                    }else if(betval[j] !== '-'){ 
+                                    colData = {
+                                        "colName":"",
+                                        "ruleType":"",
+                                        "value":""
+                                    }
+                                    if(betval[j] !== '-'){
+                                        if(j===0 && betval[j] !== '-'){
                                         colData.colName = condsModel[tabs[i]].colName[0]
-                                        colData.value = condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime' ? betval[j] :Number(betval[j])
-                                        colData.ruleType = "le"
-                                    }
-                                    if(values.length > 1){
-                                        child_relation.data.push(self.bxDeepClone(colData))
-                                    }else{
-                                        relation.data.push(self.bxDeepClone(colData))
+                                        colData.value =  condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime' || condsModel[tabs[i]].inputType === 'BetweenDate' ? betval[j] :Number(betval[j])
+                                        colData.ruleType = betval.length > 1 ? "ge" : "like"  // 只有一个只时候 按照 like 查询
+                                        
+                                        }else if(betval[j] !== '-'){ 
+                                            colData.colName = condsModel[tabs[i]].colName[0]
+                                            colData.value = condsModel[tabs[i]].inputType === 'Date' || condsModel[tabs[i]].inputType === 'DateTime' || condsModel[tabs[i]].inputType === 'BetweenDate' ? betval[j] :Number(betval[j])
+                                            colData.ruleType = "le"
+                                        }
+                                        if(values.length > 1){
+                                            child_relation.data.push(self.bxDeepClone(colData))
+                                        }else{
+                                            relation.data.push(self.bxDeepClone(colData))
+                                        }
                                     }
                                 }
-                            }
+                            
 
                             if(values.length > 1){
                                 relation.relation = 'OR'  // 大于1个选项时处理 OR
@@ -558,7 +579,15 @@ export default {
                         }
                         relation.data.push(self.bxDeepClone(colData))
                     }
-                }else if(condsModel[tabs[i]].inputType == 'fk'){
+                }else if(condsModel[tabs[i]].formType === 'between' && condsModel[tabs[i]].inputType == 'BetweenDate'){
+                        relation.relation = 'OR'
+                        colData.colName = condsModel[tabs[i]].colName[0]
+                        colData.value =  condsModel[tabs[i]].value
+                        colData.ruleType = "between"
+                        if(condsModel[tabs[i]].value != '' && condsModel[tabs[i]].value != null){
+                            relation.data.push(self.bxDeepClone(colData))
+                        }
+                    }else if(condsModel[tabs[i]].inputType == 'fk'){
                         relation.relation = 'OR'
                         colData.colName = condsModel[tabs[i]].colName[0]
                         colData.value = (condsModel[tabs[i]].formType == 'select' ?  condsModel[tabs[i]].value : condsModel[tabs[i]].value.join(","))
@@ -567,7 +596,7 @@ export default {
                             relation.data.push(self.bxDeepClone(colData))
                         }
                     }
-               if(relation.data.length !== 0){
+                if(relation.data.length !== 0){
                     relation_Conditions.data.push(self.bxDeepClone(relation))
                 } 
             }
@@ -616,16 +645,16 @@ export default {
               this.$emit('on-input-value',true)
               this.$emit('on-change',true)
               for(let i =0;i<keys.length;i++){
-                  console.log("更新了",val[keys[i]].value, oldVal[keys[i]].value)
+                //   console.log("更新了",val[keys[i]].value, oldVal[keys[i]].value)
                   if(val[keys[i]] && oldVal[keys[i]] &&  val[keys[i]].hasOwnProperty('value') && oldVal[keys[i]].hasOwnProperty('value') && val[keys[i]].value !== oldVal[keys[i]].value){
                      newNum++
                      this.$emit('on-input-value',true)
                      this.$emit('on-change',true)
-                     console.log("更新了")
+                    //  console.log("更新了")
                   }else if(val[keys[i]] && oldVal[keys[i]] &&  val[keys[i]].hasOwnProperty('value') && !oldVal[keys[i]].hasOwnProperty('value') && val[keys[i]].value !== oldVal[keys[i]].value){
                       this.$emit('on-input-value',true)
                       this.$emit('on-change',true)
-                     console.log("更新了")
+                    //  console.log("更新了")
                   }
 
                 //   if(keys.length > 0 && val[keys[i]].value != oldVal[keys[i]].value){

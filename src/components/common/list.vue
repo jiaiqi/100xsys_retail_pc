@@ -234,6 +234,14 @@
       </simple-update> -->
     </el-dialog>
 
+    <el-dialog
+      center title="批量修改"  custom-class="bxdialog"  :width="dialogWidth(listDialogWidth)" :close-on-click-modal="1 == 2" append-to-body :visible="activeForm == 'batchupdate'"  @close="activeForm = 'xx'"
+    >
+      <batch-update
+        :multipleSelection="multipleSelection"  :service="getUpdateService"  @cancel="activeForm = 'x'"  @success="onUpdateFormActionComplete($event)" v-if="activeForm == 'batchupdate'"
+      ></batch-update>
+    </el-dialog>
+
     <el-dialog  custom-class="bxdialog" title="导入" width="90%" :visible="activeForm == 'import'" append-to-body @close="activeForm = 'xx'">
       <import-dialog :service="addService" :sign-service-name="addService" v-if="activeForm == 'import'" :button="actionGridButton" @close="onImportDialogClosed">
       </import-dialog>
@@ -322,6 +330,8 @@ import CMapReaderFactory from "vue-pdf/src/CMapReaderFactory.js";
 // 批量编辑列表场景 扩展 10-18
 import batchEditList from "@/components/mixin/batch-edit-child-list-mixin.js";
 import batchEditListSelect from "@/pages/retail/checkEditPlus/select-list.vue";
+
+import batchUpdate from '@/components/ui/batch-update'
 export default {
   name: "list",
   components: {
@@ -338,7 +348,8 @@ export default {
     update: () => import("../common/update.vue"),
     Add: () => import("../common/add.vue"),
     batchApprove,
-    batchEditListSelect
+    batchEditListSelect,
+    batchUpdate
   },
   props: {
     childForeignkey: Object,
