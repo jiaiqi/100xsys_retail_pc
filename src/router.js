@@ -54,6 +54,7 @@ import treegrid from '@/components/common/treegrid'
 import procdetail from '@/components/common/procdetail'
 import procdetail_v2 from '@/components/common/procdetail_v2'
 import editgrid from '@/components/common/edit-grid'
+import editgridPlus from '@/components/common/edit-grid-plus'
 import encryptColumnCfgList from '@/pages/encrypt-column-cfg-list'
 import stat from '@/components/common/stat'
 import ConfStatChart from '@/pages/conf-stat-chart'
@@ -83,6 +84,9 @@ import goodsAttr from '@/pages/retail/goods/attribute.vue'
 import goodsList from '@/pages/retail/goods/list.vue'
 import supplier from '@/pages/retail/goods/supplier.vue'
 import vipSet from '@/pages/retail/goods/vipSet.vue'
+import attributeStocks from '@/pages/retail/goods/attributeStocks.vue'
+import orderTabList from '@/pages/retail/goods/orderTabList.vue'
+import staffManage from '@/pages/retail/staffList.vue'
 
 
 import test_field from '@/components/test/test_field'
@@ -171,7 +175,7 @@ export default new Router({
       path: '/listallproc/:service_name',
       name: 'listallproc',
       component: listallproc
-    },   
+    },
     {
       path: '/v2/listallproc/:service_name',
       name: 'listallproc_v2',
@@ -243,6 +247,11 @@ export default new Router({
       path: '/editgrid/:service_name',
       name: 'editgrid',
       component: editgrid
+    },
+    {
+      path: '/editgridPlus/:type/:service_name/:typeParams',
+      name: 'editgridPlus',
+      component: editgridPlus
     },
     {
       path: '/conf-stat-chart/:chartid',
@@ -364,6 +373,21 @@ export default new Router({
       path: '/authorityPage/:type/:role_no',
       name: 'authorityPage',
       component: authorityPage ,
+    },
+    {
+      path: '/attributeStocks',
+      name: 'attributeStocks',
+      component: attributeStocks ,
+    },
+    {
+      path: '/orderTabList',
+      name: 'orderTabList',
+      component: orderTabList ,
+    },
+    {
+      path: '/staffManage',
+      name: 'staffManage',
+      component: staffManage ,
     }
   ]
 })

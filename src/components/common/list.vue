@@ -53,7 +53,7 @@
       <div v-else>
         <el-row type="flex" class="row-bg" justify="center">
           <el-table header-row-class-name="header-row" :data="gridDataRun" stripe border style="width: 100%" :row-class-name="tableRowClassName" row-key="id" highlight-current-row @selection-change="handleSelectionChange" @filter-change="filterChange" :sortable="tabBasicsConfig.sortable" @sort-change="handleSortChange" :show-summary="getShowTableSummary()" :summary-method="onSummaryMethod" @row-dblclick="onRowDbClicked">
-            <el-table-column type="selection" label="全选" header-align="left" width="50px" v-if="(selection && !readOnly) || listType=='selectlist'">
+            <el-table-column type="selection" label="全选" header-align="left" width="50px" v-if="(selection && !readOnly) || listType=='selectlist' && (mode && mode == 'finder' ? false : true)">
             </el-table-column>
             <!-- v-if="(item.show && (!item.evalVisible || item.evalVisible()))" ---↓-->
             <el-table-column v-for="(item, index) in gridHeader" :key="index" header-align="left" v-if="getGridHeaderDispExps(item,listMainFormDatas)" :width="item.width ? item.width : getListShowFileList(item) ? item.list_min_width ? item.list_min_width : 180 : ''" :filter-method="item.filters && tabBasicsConfig.sortable ? filterHandler : null" :prop="item.column" :align="item.align" :fixed="item.rowFixed ? true : null" :show-overflow-tooltip="getListShowFileList(item) === true ? false : true" :label="item.label" :min-width="item.list_min_width + 'px'"  :column-key="item.column" :sortable="tabBasicsConfig.sortable && item.sortable && !isMem() ? 'custom' : false">
@@ -120,7 +120,7 @@
 
             </el-table-column>
 
-            <el-table-column label="操作" header-align="left" :width="sortedRowButtons.length * 40" fixed="right" v-if="isShowRowButtons && !readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
+            <el-table-column label="操作" header-align="left" :width="sortedRowButtons.length * 120" fixed="right" v-if="isShowRowButtons && !readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
               <template slot-scope="scope">
                 <!-- <el-button v-for="(button, index) in sortedRowButtons"
                             :key="index"

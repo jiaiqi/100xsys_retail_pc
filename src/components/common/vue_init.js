@@ -131,29 +131,29 @@ function init() {
             // }, function () {
             //   window.location.href = login_page;
             // });
-            // this.getRootWindow().layer.open({
-            //   title: false,
-            //   type: 2,
-            //   content: window.location.origin+login_page,
-            //   closeBtn: 0,
-            //   area: ['300px', '350px'],
-            //   shade: 0.9
-            // });
+            this.getRootWindow().layer.open({
+              title: false,
+              type: 2,
+              content: window.location.origin+login_page,
+              closeBtn: 0,
+              area: ['300px', '350px'],
+              shade: 0.9
+            });
 
           } else {
             // 当vue页面在iframe中时，跳转到登录页面
-            // if (top !== window) {
+            if (top !== window) {
 
-            //   var login_page="/main/index.html";
-            //   try {
-            //     if (top.getMainAddress ) {
-            //       console.info("1");
-            //       login_page="/"+top.getMainAddress();
-            //     }
-            //   } catch (exception) { }
+              var login_page="/main/index.html";
+              try {
+                if (top.getMainAddress ) {
+                  console.info("1");
+                  login_page="/"+top.getMainAddress();
+                }
+              } catch (exception) { }
 
-            //   window.location.href =window.location.origin+login_page;
-            // }
+              window.location.href =window.location.origin+login_page;
+            }
           }
 
 

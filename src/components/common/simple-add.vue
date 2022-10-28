@@ -20,9 +20,19 @@
 
           <div class="el-col el-col-24 el-col-xl-24">
             <div class="el-form-item" v-if="formatSection(section) && !!section">
-              <span class="section-title">{{formatSection(section)}}</span>
+              <span class="section-title">{{formatSection(section)}}    
+              <!-- <el-switch
+              active-color="#000000"
+              v-model="value1"
+              active-text="显示"
+              inactive-text="隐藏">
+            </el-switch> -->
+            </span>
+              
             </div>
+
           </div>
+
           <slot :name="section + '-begin'"></slot>
 
           <div v-for="formItem in formItems">

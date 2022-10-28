@@ -149,7 +149,7 @@
               </el-input>
             </div>
             
-            <div style="line-height:40px;" :span="2" v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" class="help-tips">
+            <div style="line-height:40px;" v-if="(!getDisabled && field.info.moreConfig !== null) && getShowHelpTips(field.info)" class="help-tips">
               
               <el-popover 
               placement="bottom" 
@@ -609,6 +609,7 @@ export default {
 <style scoped>
 .help-tips {
   color: #c0c4cc;
+  padding: 0 10px;
   /* position:absolute; */
   top: 18px;
   line-height: 1rem;
@@ -674,6 +675,7 @@ export default {
 ::v-deep .field-editor-container {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
   .input-container {
     flex: 1;
 
@@ -693,19 +695,7 @@ export default {
     width: 100%;
   }
 }
-::v-deep .el-col {
-  .el-form-item {
-    .el-col {
-      display: flex;
-      div {
-        flex: 1;
-      }
-      .raw_field_editor {
-        flex: 1;
-      }
-    }
-  }
-}
+
 </style>
 
 

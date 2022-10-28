@@ -85,13 +85,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+@media only screen and (min-width: 1200px) {
+  ::v-deep .el-col-lg-12 {
+    width: 100% !important;
+  }
+}
 ::v-deep .field-editor-container {
   display: flex;
   flex-wrap: wrap;
   .input-container {
     flex: 1;
-    max-width: 600px !important;
+    max-width: calc(100vw - 400px);
+    // max-width: 800px !important;
 
     // align-items: center;
     .el-input {
@@ -114,7 +119,7 @@ export default {
     .el-col {
       display: flex;
       div {
-        flex: 1;
+        // flex: 1;
       }
       .raw_field_editor {
         flex: 1;

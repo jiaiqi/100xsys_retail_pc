@@ -987,7 +987,7 @@ export default {
           this.gridHeader = this.noramlHeaders;
         }
         if (this.multipleSelection.length == 0) {
-          this.$alert("请选择需要编辑的数据", "提示", {
+          this.$alert("在列表左侧请勾选需要编辑的数据", "提示", {
             confirmButtonText: "确定"
           });
         }else{
