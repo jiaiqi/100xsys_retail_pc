@@ -120,7 +120,7 @@
 
             </el-table-column>
 
-            <el-table-column label="操作" header-align="left" width="240" fixed="right" v-if="isShowRowButtons && !readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
+            <el-table-column label="操作" header-align="left" :width="sortedRowButtons.length * 40" fixed="right" v-if="isShowRowButtons && !readOnly && listType!='selectlist' && !hideButtons&&sortedRowButtons.length>0">
               <template slot-scope="scope">
                 <!-- <el-button v-for="(button, index) in sortedRowButtons"
                             :key="index"

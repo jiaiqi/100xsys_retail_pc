@@ -157,7 +157,12 @@
       :visible="activeForm == 'update'"
       @close="activeForm = 'xx'"
     >
-      <bx-update :service="updateService" :pk="id"></bx-update>
+      <bx-update
+        :service="updateService"
+        :pk="id"
+        @action-complete="onUpdateFormActionComplete($event)"
+        @executor-complete="onUpdateFormActionComplete($event)"
+      ></bx-update>
     </el-dialog>
     <el-dialog
       title="复制"
@@ -466,8 +471,8 @@ export default {
                 item.icon = "el-icon-document-add";
                 this.rowButton.push(item);
               } else if (item.button_type == "duplicate") {
-                item.icon = "el-icon-copy-document";
-                this.rowButton.push(item);
+                // item.icon = "el-icon-copy-document";
+                // this.rowButton.push(item);
               } else if (item.button_type == "delete") {
                 item.icon = "el-icon-delete";
                 this.rowButton.push(item);

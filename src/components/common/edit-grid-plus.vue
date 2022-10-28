@@ -1,11 +1,11 @@
 <template>
   <div>
+    <filterTabs ref="filterTabs" v-if="tabs.length > 0 && cols.length > 0" :tabs="tabs" :srv="serviceNameTableList" :cols="cols" @on-input-value="onFilterChange" @on-change="getTableData"></filterTabs>
+    <el-table :data="tableData" height="600" border class="tb-edit" style="width: 100%" highlight-current-row @row-click="handleCurrentChange">
 
-    <el-table :data="tableData" height="800" border class="tb-edit" style="width: 100%" highlight-current-row @row-click="handleCurrentChange">
-
-      <el-table-column :prop="data.columns" :fixed="getfixedValue(data.columns)" :label="data.label" v-for="(data, index) in tableHeadr" :key="index" :width="data.col_type=='Integer'?90:180">
+      <el-table-column min-width="60px" :prop="data.columns" :fixed="getfixedValue(data.columns)" :label="data.label" v-for="(data, index) in tableHeadr" :key="index">
         <template slot-scope="scope">
-          <div v-if="is_edit">
+          <div v-if="getFieldIsEidt(scope.row[data.columns].field.info)">
             <!-- <raw-field-editor :field="scope.row[data.columns].field" :key="scope.row[data.columns].field.info.name" ref="fields"  @field-value-changed="handleEdit(scope.$index, scope.row)" ></raw-field-editor> -->
             <el-select size="small" v-if="data.col_type === 'Enum' || data.col_type === 'Dict'" v-model="scope.row[data.columns].value" placeholder="请选择" @change="handleEdit(scope.$index, scope.row)">>
               <el-option v-for="item in data.option_list_v2" :key="item.value" :label="item.key" :value="item.value"></el-option>
@@ -18,22 +18,23 @@
             </tree-finder>
             <el-input size="small" v-else v-model="scope.row[data.columns].value" @change="handleEdit(scope.$index, scope.row)"></el-input>
           </div>
-          <span v-if="!is_edit">{{scope.row[data.columns].value}}</span>
+          <span v-if="!getFieldIsEidt(scope.row[data.columns].field.info)">
+            {{buildOverflow(scope.row[data.columns])}}
+          </span>
+          <!-- <i class="el-icon-more" v-if="scope.row[data.columns].value && scope.row[data.columns].value.length > columnShowStringMaxLength" @click="scope.row[data.columns]['showflow'] = !scope.row[data.columns]['showflow']"></i> -->
         </template>
       </el-table-column>
 
-      <el-table-column fixed="right" label="操作">
+      <el-table-column fixed="right" label="操作" v-if="moreConfig && moreConfig.hasOwnProperty('isShowRowButtons') && moreConfig.isShowRowButtons">
         <template slot-scope="scope">
           <!--<el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>-->
           <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-row>
-    <el-button type="primary" @click="onEdit()">批量编辑</el-button>
-    <el-button type="primary" @click="onSubmit()">批量保存</el-button>
-    <el-button type="primary" @click="bxhide()">隐藏不显示列</el-button>
-    <el-button type="primary" @click="bxshow()">显示全部列</el-button>
+    <el-row  type="flex" class="row-bg" justify="center">
+      <!-- <el-button type="primary" @click="onEdit()">批量编辑</el-button> -->
+      <el-button type="primary" @click="onSubmit()">保存</el-button>
     </el-row>
   </div>
 </template>
@@ -47,28 +48,67 @@ import { Field } from "../model/Field";
 import RawFieldEditor from "./raw-field-editor.vue";
 import Finder from "../ui/finder.vue";
 import TreeFinder from "../ui/tree-finder.vue";
+import filterTabs from "@/components/common/filter-tabs.vue";
 
 export default {
   components: {
     Finder,
     TreeFinder,
-    RawFieldEditor
+    RawFieldEditor,
+    filterTabs
   },
 
   props: {
     service: {
       type: String
+    },
+    pageType: {
+      type: String
+    },
+    typeParams:{
+      type:[Object],
+      default:function(){
+        return null
+      }
     }
   },
-
+  computed:{
+       serviceNameTableList:function(){
+        let srvName = this.$route.params.service_name || this.service
+        return srvName
+       },
+       type:function(){
+        let type = this.$route.params.type || this.pageType
+        return type
+       },
+       operateRun:function(){
+        let operate = this.$route.params.typeParams || this.typeParams
+       },
+       moreConfig:function(){
+          let more = this.v2Data && this.v2Data.more_config ? JSON.parse(this.v2Data.more_config) : false
+          return more
+       }
+  },
   data() {
     return {
+      v2Data:null,
+      cols:[],
+      tabs:[],
       tableHeadr: [],
+      columnShowStringMaxLength:16,
       tableData: [],
       old_tableData: [], //原始数据
       service_name: this.service || this.$route.params.service_name,
       operate_params: {},
-      is_edit: false //是否编辑
+      is_edit: false, //是否编辑
+      condition:[],
+      onInputValue:"",
+      page:{pageNo: 1, rownumber: 999},
+      order:[],
+      relationCondition:{
+                "relation": "AND",
+                "data": []
+            }
     };
   },
   created: function() {
@@ -77,34 +117,18 @@ export default {
     this.is_edit = true;
   },
   methods: {
-    bxhide() {
+    onFilterChange(e){
+        let self = this
+        this.onInputValue = e
+        if(e && self.$refs.filterTabs){
+          let tabsConds = self.$refs.filterTabs.buildConditions()
 
-       if (this.service_name == "srvsys_service_columns_add_select") {
-        
-          this.getData({
-            colName: "in_add",
-            ruleType: "eq",
-            value: "1"
-          });
+          self.relationCondition = tabsConds
         }
-        if (this.service_name == "srvsys_service_columns_edit_select") {
-            this.getData({
-            colName: "in_update",
-            ruleType: "eq",
-            value: "1"
-          });
-        }
-        if (this.service_name == "srvsys_service_columns_query_select") {
-            this.getData({
-            colName: "in_list",
-            ruleType: "eq",
-            value: "1"
-          });
-        }
-
-    },
-    bxshow() {
-       this.getData()
+      },
+    getFieldIsEidt(e){
+       let fieldIsUpdated = e.srvCol['updatable'] == 1 && this.is_edit
+       return fieldIsUpdated
     },
     getfixedValue(col) {
       if (col == "label") {
@@ -112,6 +136,18 @@ export default {
       } else {
         return false;
       }
+    },
+    buildOverflow(e){
+        let str = e.value 
+        let isHide = str && str.length > this.columnShowStringMaxLength
+        let strBold = ""
+
+        if(!e.hasOwnProperty('flow')){
+          e['showflow'] = false
+        }
+        strBold = str && isHide ? !e.showflow ? str : str.substr(0,this.columnShowStringMaxLength) : str 
+        console.log(str)
+        return strBold
     },
     getData(otherCond) {
       let condition;
@@ -130,32 +166,41 @@ export default {
       this.tableHeadr = [];
       this.tableData = [];
       this.old_tableData = [];
-      this.loadColsV2(this.service_name, "list").then(response => {
+      this.loadColsV2(this.serviceNameTableList, "list").then(response => {
         let srv_cols = response.body.data.srv_cols;
+        this.cols = response.data.data.srv_cols
+        this.v2Data = response.data.data
         for (let i in srv_cols) {
           let fieldInfo = new FieldInfo(srv_cols[i], null);
           let field = new Field(fieldInfo);
           //只显示列表 或者将外键的使用in_add
-          if (
-            (srv_cols[i].in_list == "1" &&
-              srv_cols[i].columns.indexOf("_disp") == -1) ||
-            (field.info.editor == "finder" ||
-              field.info.editor == "tree-finder")
-          ) {
+          if ((srv_cols[i].in_list == "1" &&srv_cols[i].columns.indexOf("_disp") == -1)) {
             this.tableHeadr.push(srv_cols[i]);
           }
         }
+        let tabs = response.data.data.tabs;
+          this.cols = response.data.data.srv_cols
+          if (tabs && tabs.length > 0) {
+            this.buildSections(tabs);
+          }
+          
 
       if(otherCond){
         condition.push(otherCond);
       }
      
-
-        this.select(
-          this.service_name,
-          condition,
-          page,
-          order
+   //service_name, condition, page, order, group, mapcondition, app,isproc,columns,relationCondition
+         this.getTableData()
+      });
+    },
+    handleCurrentChange(row, event, column) {},
+    getTableData(){
+      this.select(
+          this.serviceNameTableList,
+          this.condition,
+          this.page,
+          this.order,
+          null,null,null,null,null,this.relationCondition
         ).then(response => {
           let list = response.body.data;
           this.old_tableData = this.onExtend(list);
@@ -190,11 +235,8 @@ export default {
             }
           }
           this.tableData = list;
-        });
-      });
+        })
     },
-    handleCurrentChange(row, event, column) {},
-
     handleEdit(index, row) {
       let slef = this;
       if (index + 1 == slef.tableData.length) {
@@ -256,7 +298,7 @@ export default {
 
       let params = [];
       let add_obj = {
-        serviceName: this.service_name.replace("select", "add"),
+        serviceName: this.serviceNameTableList.replace("select", "add"),
         data: []
       };
       if (addList.length > 0) {
@@ -287,7 +329,7 @@ export default {
       if (updateList.length > 0) {
         for (let i in updateList) {
           let update_obj = {
-            serviceName: this.service_name.replace("select", "update"),
+            serviceName: this.serviceNameTableList.replace("select", "update"),
             data: [],
             condition: []
           };
@@ -322,7 +364,7 @@ export default {
       if (deleteLits.length > 0) {
         for (let i in deleteLits) {
           let delete_obj = {
-            serviceName: this.service_name.replace("select", "delete"),
+            serviceName: this.serviceNameTableList.replace("select", "delete"),
             condition: []
           };
           let delete_obj_condition = {
@@ -340,7 +382,7 @@ export default {
       } else {
         this.operate(params).then(response => {
           if (response.body.state === "SUCCESS") {
-            this.is_edit = false;
+            this.is_edit = true;
             this.getData();
             this.$message.info(response.body.resultCode);
           } else {
@@ -375,6 +417,96 @@ export default {
       }
       return o1;
     },
+    buildSections: function (tabs) {
+        // generate tab.condition, order, depend_sections from json string to js object/array
+        console.log("buildSections",tabs)
+        let self = this
+        let tab = {}
+        let tabsData = []
+        tabs.forEach((t)=>{
+          tab = {
+              service:null,
+              table_name:null,
+              orders:null,
+              conditions:null,
+              seq:null,
+              parent:null,
+              label:null,
+              list_tab_no:null,
+              more_config:null,
+              inputType:null
+            }
+            let mc = JSON.parse(t.more_config)
+            // console.log("JSON.parse",t.more_config,JSON.parse(t.more_config))
+            tab.more_config = JSON.parse(t.more_config)
+            tab.service = t.service
+            tab.table_name = t.table_name
+            tab.conditions = mc.option_list ? mc.option_list.conditions : null || []
+            tab.orders = t.orders
+            tab.default = mc.default
+            tab.seq = t.seq
+            tab.label = t.label
+            tab.list_tab_no = t.list_tab_no
+            tab._data = t
+            tab._options = []
+            tab._type = mc.type || null
+            tab.option_list = JSON.parse(t.more_config).option_list || null
+            tab._colName = mc.colName || null
+            tab.inputType = mc.inputType || null
+            tab.showAllTag = mc.showAllTag || false
+            tab.default = mc.default || '',
+            tab.placeholder = mc.placeholder ||  mc.type === 'select' ? '请选择': '请输入'
+            tab.remoteMethod=""
+
+            if(tab._colName){
+              tab._colName = tab._colName.split(',')
+              let cols = tab._colName
+              let srvCols = self.cols
+              tab['_colSrvData'] = []
+              // console.log("tab",tab)
+              for(let c=0;c<cols.length;c++){
+                  for(let cs = 0;cs<srvCols.length;cs++){
+                    if(cols[c] === srvCols[cs].columns){
+                      tab._colSrvData.push(srvCols[cs])
+                    }
+                  }
+              }
+              
+            }
+            if(tab.inputType == 'fk'){
+             let cond=[
+                  {"colName": tab.option_list.key_disp_col,
+                "ruleType": "[like]",
+                "value": ''}
+              ]
+              cond = cond.concat(tab.option_list ? tab.option_list.conditions : [])
+              console.log("build option ",tab)
+              let options =[]
+              self.select(tab.option_list.serviceName, cond, null, null, null, null,null, null, null, null,false).then((res) =>{
+              let resData = res.data.data
+                for(let i =0;i<resData.length;i++){
+                    let item = resData[i]
+                    let opt = {
+                            value:item[tab.option_list.refed_col],
+                            label:item[tab.option_list.key_disp_col]
+                    }
+                     options.push(opt)
+                    
+                }
+
+                tab["_options"] = options
+                tab["page"] = res.data.page
+                console.log("options",options)
+             })
+            }
+            tabsData.push(tab)
+        })
+        if(!self.tabsBuild){
+          self.tabs = tabsData
+          self.tabsBuild = true
+        }
+        
+      },
     onEdit() {
       this.is_edit = true;
     },
