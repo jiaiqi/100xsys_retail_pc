@@ -42,6 +42,9 @@
     },
 
     created: function () {
+      if(this.field.model){
+        this.selected = this.field.model.split(',')
+      }
     },
 
     mounted: function () {
