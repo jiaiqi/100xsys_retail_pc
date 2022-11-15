@@ -1,7 +1,7 @@
 <template>
 <el-row class="filter-list-view" v-if="tabs.length > 0 &&  Object.keys(formModel).length > 0 ">
      <el-form ref="form" label-width="80px" size="medium " :inline="tabsInline">
-        <el-form-item  :label="tab.label" v-for="(tab,index) in tabRun" :key="index">
+        <el-form-item  :label="tab.label" v-for="(tab,index) in tabRun" :key="index" >
             
             <div v-if="tab._type === 'input'">
                 <el-row :gutter="5">
@@ -72,10 +72,10 @@
             </div>
         </el-form-item>
         
-        <!-- <el-form-item>
-            <el-button type="primary" @click="buildConditions(formModel)">查询</el-button>
-            <el-button>重置</el-button>
-        </el-form-item> -->
+        <el-form-item>
+            <el-button type="primary" @click="onSearth(formModel)">查询</el-button>
+            <el-button @click="reset">重置</el-button>
+        </el-form-item>
         </el-form>
     </el-row>
 </template>
@@ -109,6 +109,8 @@ export default {
         },
         formModel:{},
         onInputValue:false, // 是否有输入值
+        initFormModel:{},
+        isReset:false,
     };
   },
   components:{selectPlus},
@@ -159,6 +161,18 @@ export default {
       
   },
   methods: {
+    onSearth(){
+        this.$emit('on-input-value',true)
+        this.$emit('on-change',true)
+        
+    },
+    reset(){
+        this.isReset = false
+        this.$set(this,'formModel', this.bxDeepClone(this.initFormModel) )
+        this.$nextTick(()=>{
+            this.onSearth()
+        })
+    },
       selectChange(e){
           this.$set(this.formModel[e.listNo],'value',e.value)
       },
@@ -199,7 +213,7 @@ export default {
                       col.value = item.default == '' ?  [] : item.default.split(',')
                   }
                   
-                  if(item.showAllTag && col.value.length  == 0){
+                  if(item.showAllTag && col.value.length  == 0 && item._type === 'checkbox'){
                       col.value.unshift('_unlimited_')
                   }
                  
@@ -216,6 +230,7 @@ export default {
                     model[item.list_tab_no] =col
               }
           })
+          self.initFormModel = self.bxDeepClone(model)
           self.formModel = model
       },
       getTabSrvCol(tab){
@@ -263,6 +278,7 @@ export default {
       },
       onReset(){
           this.onBuildFormValues()
+
       }, 
       buildFkOptionList(query,e){
            let self = this
@@ -534,10 +550,10 @@ export default {
                                 relation.data.push(self.bxDeepClone(child_relation))
                             }
                         }
-                    }else if(condsModel[tabs[i]].inputType === 'Enum' || condsModel[tabs[i]].inputType === 'Dict' || condsModel[tabs[i]].inputType === 'group'){
+                    }else if((condsModel[tabs[i]].inputType === 'Enum' && condsModel[tabs[i]].value !== '_unlimited_') || condsModel[tabs[i]].inputType === 'Dict' || condsModel[tabs[i]].inputType === 'group'){
                         relation.relation = 'OR'
                         colData.colName = condsModel[tabs[i]].colName[0]
-                        colData.value = (condsModel[tabs[i]].formType == 'radio' ?  condsModel[tabs[i]].value : condsModel[tabs[i]].value.join(","))
+                        colData.value = (condsModel[tabs[i]].formType == 'radio' ?  condsModel[tabs[i]].value == '_unlimited_' ? "" :  condsModel[tabs[i]].value : condsModel[tabs[i]].value.join(","))
                         colData.ruleType = "in"
                         relation.data.push(self.bxDeepClone(colData))
                     }else if(condsModel[tabs[i]].inputType === 'String' ){
@@ -642,18 +658,18 @@ export default {
               let keys = Object.keys(val)
               let onNew = false
               let newNum = 0
-              this.$emit('on-input-value',true)
-              this.$emit('on-change',true)
+            //   this.$emit('on-input-value',true)
+            //   this.$emit('on-change',true)
               for(let i =0;i<keys.length;i++){
                 //   console.log("更新了",val[keys[i]].value, oldVal[keys[i]].value)
                   if(val[keys[i]] && oldVal[keys[i]] &&  val[keys[i]].hasOwnProperty('value') && oldVal[keys[i]].hasOwnProperty('value') && val[keys[i]].value !== oldVal[keys[i]].value){
                      newNum++
-                     this.$emit('on-input-value',true)
-                     this.$emit('on-change',true)
+                    //  this.$emit('on-input-value',true)
+                    //  this.$emit('on-change',true)
                     //  console.log("更新了")
                   }else if(val[keys[i]] && oldVal[keys[i]] &&  val[keys[i]].hasOwnProperty('value') && !oldVal[keys[i]].hasOwnProperty('value') && val[keys[i]].value !== oldVal[keys[i]].value){
-                      this.$emit('on-input-value',true)
-                      this.$emit('on-change',true)
+                    //   this.$emit('on-input-value',true)
+                    //   this.$emit('on-change',true)
                     //  console.log("更新了")
                   }
 

@@ -182,13 +182,13 @@ export default {
                     data[key] = eval("var zz=" + func + "(data); zz") //eval(item[key].redundant.func)
                     console.log('eval',data[key])
                 }
-                if(item[key].init_expr && item[key].init_expr.hasOwnProperty("'")){
+                if(item[key].init_expr && item[key].init_expr.indexOf("'") !== -1){
+                    console.log('测试',item[key])
                     let reg1 = new RegExp("'","g"); // 加'g'，删除字符串里所有的"a"
                     let str = item[key].init_expr
                     data[key] = str.replace(reg1,"")
                 }
             }
-
             console.log("onAdd2MemSubmitted",data)
             this.onAdd2MemSubmitted(data)
        },
@@ -248,7 +248,7 @@ export default {
           
            let config = this.moreConfig
            let cfg = config && config.hasOwnProperty("showTableSummary") ? config.showTableSummary : false
-           if(cfg && cfg.hasOwnProperty("columns") && cfg.columns.length > 0 && !cfg.hasOwnProperty('type') &&  cfg.type == 'table'){
+           if(cfg && cfg.hasOwnProperty("columns") && cfg.columns.length > 0){
                return true
            }else{
                return false

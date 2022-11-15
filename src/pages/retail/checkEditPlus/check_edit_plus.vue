@@ -2,14 +2,14 @@
   <div>
       <el-tabs v-model="activeName" @tab-click="handleClick(activeName)">
         <el-tab-pane :label="tab.label" :name="tab.name" v-for="(tab,index) in tabPanls" :key="index">
-            <listTab ref="listpage" :tableButtonRouterType="'checkEditPage'" 
-              @on-grid-button="onClickGridButton($event)" :service="getService()" v-if="tab.tabType == 'list' "></listTab>
-            <addform ref="formpage" v-if="tab.tabType == 'form'  " nav2LocationStr="check-editer" :name="tab.name" :service="tab.name" @action-complete="actionComplete($event)">
+            <listTab :ref="tab.name" :tableButtonRouterType="'checkEditPage'" 
+              @on-grid-button="onClickGridButton($event)" :service="getService()" v-if="tab.tabType == 'list' && activeName == tab.name"></listTab>
+            <addform :ref="tab.name" v-if="tab.tabType == 'form' && activeName == tab.name" nav2LocationStr="check-editer" :name="tab.name" :service="tab.name" @action-complete="actionComplete($event)">
             </addform>
           
         </el-tab-pane>
         <!-- <el-tab-pane label="定时任务补偿" name="fourth">
-            
+            listpage formpage
         </el-tab-pane> -->
     </el-tabs>
     <!-- <editGrid :service="service"></editGrid> -->
@@ -45,7 +45,6 @@
     },
 
     mixins: [],
-
     data() {
       return {
         isDraft:false,
@@ -88,7 +87,6 @@
             activeRow = {sections: []};
           }
           
-
           activeRow.sections.push(section)
         }
 

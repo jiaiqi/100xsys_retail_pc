@@ -38,7 +38,7 @@ export default {
       selected: [],
       // 树形结构数据
       options: [],
-      visibleChange: false
+      visibleChange: false,
     };
   },
 
@@ -46,7 +46,7 @@ export default {
     props: function() {
       let props = {
         value: this.field.info.valueCol,
-        label: this.needRenameLabel() ? "valuezh" : this.field.info.dispCol
+        label: this.needRenameLabel() ? "valuezh" : this.field.info.dispCol,
       };
 
       return props;
@@ -62,13 +62,13 @@ export default {
       } else {
         return true;
       }
-    }
+    },
   },
 
   methods: {
-    onFocus(){
-      if(!this.field.model){
-        this.loadOptions()
+    onFocus() {
+      if (!this.field.model) {
+        this.loadOptions();
       }
     },
     needRenameLabel() {
@@ -120,14 +120,14 @@ export default {
             {
               colName: fieldInfo.valueCol,
               ruleType: "like",
-              value: val
+              value: val,
             },
             {
               colName: fieldInfo.dispCol,
               ruleType: "like",
-              value: val
-            }
-          ]
+              value: val,
+            },
+          ],
         };
       } else if (curVal) {
         conditions = [
@@ -135,8 +135,8 @@ export default {
           {
             colName: this.props.value,
             ruleType: "eq",
-            value: curVal
-          }
+            value: curVal,
+          },
         ];
       } else if (parentNo) {
         if (loader.parentCol) {
@@ -145,8 +145,8 @@ export default {
             {
               colName: loader.parentCol,
               ruleType: "eq",
-              value: parentNo
-            }
+              value: parentNo,
+            },
           ];
         }
       } else if (this.selected && this.selected.length > 0) {
@@ -156,8 +156,8 @@ export default {
           {
             colName: loader.parentCol,
             ruleType: "eq",
-            value: parentNo
-          }
+            value: parentNo,
+          },
         ];
       } else {
         // 加载第一级数据
@@ -176,8 +176,8 @@ export default {
             ...conditions,
             {
               colName: loader.parentCol,
-              ruleType: "isnull"
-            }
+              ruleType: "isnull",
+            },
           ];
         }
       }
@@ -186,23 +186,23 @@ export default {
         serviceName: loader.service,
         colNames: ["*"],
         condition: conditions,
-        relation_condition: relation_condition
+        relation_condition: relation_condition,
       };
-      return this.$http.post(url, params).then(response => {
+      return this.$http.post(url, params).then((response) => {
         if (response && response.data && response.data.data) {
-          let options = response.data.data.map(item => {
+          let options = response.data.data.map((item) => {
             item.children = item.is_leaf === "是" ? null : [];
             return item;
           });
           if (this.needRenameLabel()) {
-            options.forEach(option => this.renameLable(option));
+            options.forEach((option) => this.renameLable(option));
           }
           if (curVal && response.data.data.length > 0) {
             let item = response.data.data[0];
             let path = item.path;
             this.selected = path
               .split("/")
-              .map(val => {
+              .map((val) => {
                 if (
                   typeof item[this.props.value] === "number" &&
                   !isNaN(Number(val))
@@ -211,7 +211,7 @@ export default {
                 }
                 return val;
               })
-              .filter(t => !!t);
+              .filter((t) => !!t);
             this.field.model = item;
             this.$emit("field-value-changed", this.field.info.name, this.field);
           }
@@ -240,14 +240,14 @@ export default {
           let params = {
             serviceName: loader.service,
             colNames: ["*"],
-            condition: []
+            condition: [],
           };
           params.condition = [
             {
               colName: loader.parentCol,
               ruleType: "eq",
-              value: item
-            }
+              value: item,
+            },
           ];
           let data = [];
           let res = await this.$http.post(url, params);
@@ -265,7 +265,7 @@ export default {
       }
     },
     setOptionChild(options, valCol, parentNo, children) {
-      options = options.map(item => {
+      options = options.map((item) => {
         if (item[valCol] === parentNo) {
           if (children.length === 0) {
             children = null;
@@ -281,7 +281,6 @@ export default {
         }
         return item;
       });
-      debugger;
       return options;
     },
     loadOptions() {
@@ -294,11 +293,11 @@ export default {
         let curVal = this.field.getSrvVal();
         return this.treeLazySelect(loader, null, null, curVal);
       } else {
-        return this.treeSelect(loader.service, conditions).then(response => {
+        return this.treeSelect(loader.service, conditions).then((response) => {
           if (response && response.data && response.data.data) {
             let options = response.data.data;
             if (this.needRenameLabel()) {
-              options.forEach(option => this.renameLable(option));
+              options.forEach((option) => this.renameLable(option));
             }
             this.options = options;
           }
@@ -313,7 +312,7 @@ export default {
       option.valuezh = option.value;
 
       if (option.children && option.children.length > 0) {
-        option.children.forEach(child => this.renameLable(child));
+        option.children.forEach((child) => this.renameLable(child));
       }
     },
 
@@ -337,7 +336,7 @@ export default {
     getPath(val) {
       let option = {};
       if (val) {
-        option = this.options.find(item => item[this.props.value] === val);
+        option = this.options.find((item) => item[this.props.value] === val);
       }
       if (option && option.path) {
         return option.path;
@@ -347,7 +346,7 @@ export default {
       let valueCol = this.field.info.valueCol;
       let targets = this.options;
       for (let i in this.selected) {
-        targets = targets.filter(opt => opt[valueCol] == this.selected[i]);
+        targets = targets.filter((opt) => opt[valueCol] == this.selected[i]);
         if (!targets || targets.length == 0) {
           return null;
         }
@@ -376,10 +375,10 @@ export default {
         queryMethod: "select",
         colNames: ["*"],
         condition: [
-          { colName: fieldInfo.valueCol, value: srvVal, ruleType: "eq" }
-        ]
+          { colName: fieldInfo.valueCol, value: srvVal, ruleType: "eq" },
+        ],
       };
-      return this.selectList(queryJson).then(response => {
+      return this.selectList(queryJson).then((response) => {
         if (
           response &&
           response.data &&
@@ -390,7 +389,7 @@ export default {
           let path = item.path;
           this.selected = path
             .split("/")
-            .map(val => {
+            .map((val) => {
               if (
                 typeof item[this.props.value] === "number" &&
                 !isNaN(Number(val))
@@ -399,7 +398,7 @@ export default {
               }
               return val;
             })
-            .filter(t => !!t);
+            .filter((t) => !!t);
           this.field.model = item;
           this.$emit("field-value-changed", this.field.info.name, this.field);
           if (this.selected.length > 0 && loader.parentCol) {
@@ -506,24 +505,35 @@ export default {
           this.field.info.srvCol.option_list_v2.service_label) ||
         "详情";
       this.addTabByUrl(this.getLinkUrl(), tabTitle);
-    }
+    },
   },
 
   destroyed: function() {},
 
   mounted: function() {
-    this.loadOptions().then(_ => {
+    this.loadOptions().then((_) => {
       if (this.selected.length == 0 && this.field.model) {
         let value = this.field.model[this.field.info.valueCol];
         if (value == undefined || value == null) {
           value = this.field.model;
         }
-        console.log("tree-finder", this);
         if (this.field.info.dispLoader.parentCol) {
           // this.setInitValOption(value)
         } else {
           this.setSrvVal(value);
         }
+      } else if (
+        this.options.length > 0 &&
+        !this.field.model &&
+        this.field.info &&
+        this.field.info.srvCol &&
+        this.field.info.srvCol.init_expr === "$firstRowData"
+      ) {
+        // 默认选中首行数据
+        this.field.model = this.options[0];
+        this.selected = [this.field.model[this.field.info.valueCol]]
+        this.$emit("field-value-changed", this.field.info.name, this.field);
+        
       }
     });
   },
@@ -532,11 +542,10 @@ export default {
       if (newValue) {
         this.loadOptions();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>
+<style scoped></style>

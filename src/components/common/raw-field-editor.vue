@@ -5,7 +5,6 @@
     <el-row>
       <el-col :span="field.hasHistoryData() || field.getUniqueCheck() ? 22 : 24">
         <!--主体内容-->
-
         <template>
           <div v-if="ifUseRawFieldEditor()" class="field-editor-container">
             <div class="input-container">
@@ -15,29 +14,22 @@
               </el-input>
               <el-switch v-else-if="field.info.editor === 'switch'" v-model="field.model" active-color="#13ce66" inactive-color="#777777">
               </el-switch>
-
               <el-select v-else-if="field.info.editor === 'select'" v-model="field.model" :placeholder="field.info.placeholder" clearable :disabled="getDisabled" @change="$emit('field-value-changed', field.info.name, field)" @blur="onBlur">
                 <el-option v-for="item in field.optionsFunc()" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
-
-        
-
               <userlist v-else-if="field.info.editor === 'userlist'" :field="field" ref="editor" @field-value-changed="
                   $emit('field-value-changed', field.info.name, field)
                 ">
               </userlist>
-
               <ueditorPlus :field="field" ref="snote" v-else-if="field.info.editor == 'snote'" @field-changed="
                   $emit('field-value-changed', field.info.name, field)
                 ">
               </ueditorPlus>
-
               <ueditor v-else-if="field.info.editor === 'ueditor'" :field="field" @field-changed="
                   $emit('field-value-changed', field.info.name, field)
                 " ref="editor">
               </ueditor>
-
               <!-- temporal -->
               <el-date-picker v-else-if="field.info.editor === 'date-picker' && field.model !== '******'" v-model="field.model" :type="field.info.subtype" clearable :format="
                   field.info.subtype == 'year'

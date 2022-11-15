@@ -45,6 +45,7 @@ export default {
       groupHeaderCols: {},
       selection: true,
       gridData: [],
+      statsData:[],
       defGridData: [],
       gridButton: [],
       actionGridButton:null,
@@ -383,9 +384,11 @@ export default {
   },
 
   methods: {
-    
+    getMoreConfig(){
+       return this.moreConfig
+    },
     getButtonOptSrv(btn,row,type){
-         let self = this
+         let self = this  
          let serviceName=""
          let serviceViewName=""
          let permission = false
@@ -1449,7 +1452,7 @@ export default {
           this.condition.push(cMap);
         }
       }
-    
+      
 
       this.condition.filter(item => item.dynamic === true).forEach(item => {
         let ctx = this
@@ -1467,6 +1470,10 @@ export default {
       if (hasEmptyRequiredCondition) {
         throw new MissRequiredConditionError();
       }
+      
+      
+      
+      
       return this.condition;
     },
     loadDraftLength(){
@@ -1567,7 +1574,10 @@ export default {
             }
 
             this.gridData = listData;
-
+            if(response.body.hasOwnProperty('stats_data')){
+              self.$emit('stats-data-load',response.body.stats_data)
+              self.statsData = response.body.stats_data
+            }
             if(this.gridData && this.gridData.length >0 && this.gridData[0].hasOwnProperty('_encrypt_cols')){
               this._encrypt_cols = this.gridData[0]['_encrypt_cols']  // 加密的字段
             // this.gridData.splice(0, this.gridData.length - 1)
@@ -1596,7 +1606,7 @@ export default {
         } else {
           //加载表格数据
           if (self.defaultapi == "select") {
-            // console.log(this.pageSize)
+            console.log('查询 relationCondition',this.relationCondition)
             
             let relationCondition = self.relationCondition
             // console.log(this.showPagination)
@@ -1616,6 +1626,12 @@ export default {
               "list_page"
             ).then(response => {
               self.gridData = response.body.data;
+              
+              // self.statsData = response.body.stats_data? response.body.stats_data:[]
+              if(response.body.hasOwnProperty('stats_data')){
+                self.$emit('stats-data-load',response.body.stats_data)
+                self.statsData = response.body.stats_data
+              }
               let page = response.body.page
               if(!page){
                 page = { total:response.body.data.length }
@@ -1732,6 +1748,11 @@ export default {
               "list_page"
             ).then(response => {
               this.gridData = response.body.data;
+              
+              if(response.body.hasOwnProperty('stats_data')){
+                self.$emit('stats-data-load',response.body.stats_data)
+                self.statsData = response.body.stats_data
+              }
               console.log( this.gridData)
               this.unmodifiedGridData = _.cloneDeep(this.gridData);
               // this.gridData.splice(0, this.gridData.length - 1)
@@ -1828,6 +1849,35 @@ export default {
         return 'left'
       }
     },
+    getTableHeaderChild(header){
+       let heads = this.gridHeader
+       let sectionTitle = header.section_title
+      
+       let headChild = this.gridHeader.filter((item) => {
+        if(item.srvcol.section_title == sectionTitle && sectionTitle){
+          return item
+        }
+       })
+       let headKeys = []
+       headKeys = headChild.map((item) =>{
+          return item.column
+       })
+       let keysStr =  headChild.map((item) =>{
+        return item.srvcol.section_title
+     }).join(',')
+       let headerIsShow = headKeys.indexOf(header.column) == 0 
+       if(headerIsShow){
+          
+            console.log('headKeys',{headKeys,keysStr,headChild,headerIsShow})
+       }else{
+        headChild = []
+        headKeys= []
+        keysStr = ''
+       }
+       
+       return {headKeys,keysStr,headChild,headerIsShow}
+      
+    },
     buildGridHeaders: function (srv_cols) {
       //sectionlist分组
       this.gridHeader = [];
@@ -1851,6 +1901,7 @@ export default {
         let colType = serviceCol["col_type"];
         header["column"] = colName;
         header["label"] = serviceCol["label"];
+        header["section_title"] = serviceCol["section_title"];
         header["width"] = "";
         header["show"] = serviceCol["in_list"] === 1;
         header["sortable"] = true;
@@ -2074,7 +2125,8 @@ export default {
             // service more config 配置 selection 是否为可选择列表，默认为 false
             let moreConfig = JSON.parse(respData.more_config)
             this.moreConfig = moreConfig
-
+            this.$set(this,'moreConfig',moreConfig)
+            this.$emit('more-config-loaded',moreConfig)
             this.buildBatchAddCheck()
             if(this.moreConfig.hasOwnProperty("selection")){
                this.selection = this.moreConfig.selection    // moreConfig 配置有限批量操作 检查
@@ -2345,8 +2397,19 @@ export default {
         isProc = this.listType
       }
       
+       let cond = this.buildQueryConditions()
 
-      this.genExportExcel(this.service_name, this.buildQueryConditions(), null, this.order,null,null,isProc,columns)
+       let multipleSelection = this.multipleSelection
+      if(multipleSelection.length > 0){
+         let val = multipleSelection.map((item) =>{ return item.id})
+         let col = {
+          colName:'id',
+          ruleType:'in',
+          value:val.join(',')
+         }
+         cond.push(col)
+      }
+      this.genExportExcel(this.service_name, cond, null, this.order,null,null,isProc,columns)
         .then((response) => {
 
           var uuid = response.body.data.uuid
@@ -2479,6 +2542,8 @@ export default {
     if(this.listType !== 'treelist'){
       if(this.listType == 'list' || this.listType == 'treelist'){
         this.inplaceEditMode = false
+      }else if(this.listType == "addchildlist"){
+        this.inplaceEditMode = true
       }
       this.initGridData();
     }

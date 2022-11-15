@@ -1,5 +1,15 @@
 <template>
   <div>
+    <el-alert
+      v-if="moreConfig && moreConfig.hasOwnProperty('pagePrompt')"
+      :title="moreConfig.pagePrompt.title ? moreConfig.pagePrompt.title:''"
+      :closable='false'
+      :type="moreConfig.pagePrompt.type ? moreConfig.pagePrompt.type:'warning'">
+      <slot>
+        <div v-html="moreConfig.pagePrompt.description">{{moreConfig.pagePrompt.description}}</div>
+      </slot>
+    </el-alert>
+    
     <filterTabs ref="filterTabs" v-if="tabs.length > 0 && cols.length > 0" :tabs="tabs" :srv="getService()" :cols="cols" @on-input-value="onFilterChange" @on-change="getTableDatas"></filterTabs>
     <!-- <el-row  v-if="tabs.length > 0">
       <el-col :span="24" style="text-align:center">
@@ -32,7 +42,21 @@
       </template>
 
     </div> -->
-
+    <el-row :gutter="20" v-if="statsData.length > 0" style="border: 1px solid #f2f2f2;
+    padding: 5px;margin:0;">
+      <div class="stata-data-layout">
+          <div  v-for="(sum,index) in statsData" :key="index" class="text-center stata-data-item">
+            <div class="grid-content bg-purple" style="font-size:1.2rem;color:#409eff;">
+              {{sum.label}}
+              <el-tooltip class="item" effect="dark" v-if="sum.tip" :content="sum.tip" placement="right">
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+            </div>
+            <div class="grid-content bg-purple">{{sum.unit ? sum.unit : ''}}{{sum.value}}</div>
+          </div>
+      </div>
+      
+    </el-row>
     <div>
       <template>
         <treegrid ref="list"
@@ -55,6 +79,8 @@
               :inplace-edit="inplaceEdit"
               :default-inplace-edit-mode="defaultInplaceEditMode"
               :default-dirty-flags="defaultDirtyFlags"
+              @more-config-loaded="moreConfigLoaded"
+              @stats-data-load="statsLoaded"
               @grid-data-changed="$emit('grid-data-changed', $event)"
               @on-grid-button="$emit('on-grid-button', $event)"
               @v2-loaded-isDraft="v2LoadedIsDraft($event)"
@@ -105,7 +131,9 @@
         tabsBuild:false,
         isDefault:null,
         relationCondition:{},
-        onInputValue:false  // 是否有查询条件
+        onInputValue:false , // 是否有查询条件
+        moreConfig:null,
+        statsData:[]
       }
     },
 
@@ -184,11 +212,18 @@
 
         return rows;
       },
-
       gridData: function () {
-        return this.$refs.list.gridData;
+        return this.$refs.list ? this.$refs.list.gridData : [];
       },
-
+      // statsData: function () {
+      //   let self = this
+      //     return self.$refs.list ? self.$refs.list.statsData : [];
+      // },
+      // gridMoreConfig:function(){
+      //   let self = this
+      //   return self.$refs.list ?  self.$refs.list.getMoreConfig() : {}
+        
+      // },
       getDefaultConditions: function () {
         let conditions = [];
         for (let section of this.sections) {
@@ -208,9 +243,18 @@
 
     },
 
+    updated(){
 
+    },
     methods: {
-      
+      statsLoaded(e){
+        console.log('statsLoaded',e)
+         this.statsData = e
+      },
+      moreConfigLoaded(e){
+        console.log('moreConfigLoaded',e)
+         this.moreConfig = e
+      },
       onFilterChange(e){
         let self = this
         this.onInputValue = e
@@ -664,6 +708,24 @@
 
   }
 </script>
+<style lang="less" scoped>
+  .stata-data-layout{
+    width:100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+    .stata-data-item{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        div{
+          padding:0.5rem;
+          white-space:nowrap;
+        }
+    }
+  }
+</style>
 
 
 

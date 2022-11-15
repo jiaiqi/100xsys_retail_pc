@@ -3,7 +3,7 @@
       <el-row style="padding:30px">
          <el-col :span="24">
        <el-input
-    placeholder="请输入内容"
+    placeholder="请扫码或输入商品名/助记码"
     suffix-icon="el-icon-full-screen"
     @keyup.enter.native="onEnter"
     v-model="searchStr">
@@ -64,6 +64,7 @@
             :readOnly="true"
             :storage-type="storageType"
             :default-condition="listCondition"
+            :relationCondition="relationCondition"
             :service="mainservice"
             @grid-data-changed="$emit('grid-data-changed', $event)"
           >
@@ -134,7 +135,8 @@ export default {
         children: "children",
         label: "",
       },
-      searchStr:""
+      searchStr:"",
+      relationCondition:{}
     };
   },
   mixins: [ListPopupMixin, CustButtonMinx, MemListMixin],
@@ -149,7 +151,10 @@ export default {
        type: String,
     },
     searchColumn:{
-       type: String,
+       type: [Array,String],
+       default:function(){
+        return "goods_barcode,goods_name,mnemonic_code"
+       }
     },
     mainType:{
       type: String,
@@ -169,15 +174,54 @@ export default {
         ruleType:"in",
         value:this.searchStr
       }
+      
+
       this.currentData = {}
+      
+
+      let relation_Conditions={
+              "relation": "OR",
+              "data": []
+          }
+      let  colData = {
+              "colName":"",
+              "ruleType":"",
+              "value":""
+          }
+      let cols = []
       if(this.searchStr){
-         this.listCondition.push(cond)
+        if(this.searchColumn.indexOf(',') == -1){
+          let cond = {
+            colName:this.searchColumn,
+            ruleType:"in",
+            value:this.searchStr
+          }
+          
+          this.listCondition.push(cond)
+        }else if(this.searchStr && this.searchColumn.indexOf(',') !== -1){
+          cols = this.searchColumn.split(',')
+          for(let col of cols){
+              colData = {
+                  "colName":col,
+                  "ruleType":"[like]",
+                  "value":this.searchStr
+              }
+              relation_Conditions.data.push(this.bxDeepClone(colData))
+              // this.relationCondition = relation_Conditions
+          }
+          
+              this.$set(this,'relationCondition',relation_Conditions)
+        }
       }else{
-        
-         this.listCondition = []
+        this.listCondition = []
+        this.relationCondition = {}
       }
-      this.$refs.list.loadTableData();
-      this.searchColumn = ""
+      
+      this.$nextTick(()=>{
+          this.$refs.list.loadTableData();
+      })
+      
+      // this.searchColumn = []
       
     },
     onSaveCheck(){

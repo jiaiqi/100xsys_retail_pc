@@ -25,6 +25,7 @@
           :default-expand-all="getUserChecked(item.checkCfg,'expand')"
           :check-strictly="!getUserChecked(item.checkCfg,'cascade')"
           :default-checked-keys="item.checkedKeys"
+          @current-change="currentChange"
           @check="treeCurrentChange"
           :props="defaultProps">
 
@@ -154,8 +155,6 @@ export default {
       roleNo:function(){
           return  this.$route.params.role_no || 'RL_202210270003'
       }
-      
-      
   },
   methods: {
     onSubmit(){
@@ -171,6 +170,7 @@ export default {
     },
     reqRun(){
         // let nodes = this.checkedNodes
+          let self = this
           let req = {
           "role_name": this.roleModel.role_name,
           "type": this.pageType,
@@ -179,24 +179,37 @@ export default {
           "funs": [],
           "srvs": []
           }
-          for(let node of this.checkedNodes){
-              if(node.relate_menu_no){
-                req.menus.push(node.relate_menu_no)
+          let checkedNodes = []
+          let trees = this.terminalType
+          for(let node in trees){
+             let nodes = []
+             let treemode = 'tree'+node
+             nodes = self.$refs[treemode][0].store._getAllNodes()
+            //  checkedNodes = nodes.filter((item) => item.checked == true)
+             for(let nl of nodes){
+              if(nl.checked == true){
+                 checkedNodes.push(nl)
               }
-              if(node.fun_no){
-                req.funs.push(node.fun_no)
+             }
+            //  checkedNodes = checkedNodes.concat(nodes)
+          }
+          for(let n in checkedNodes){
+              if(checkedNodes[n].data.relate_menu_no){
+                req.menus.push(checkedNodes[n].data.relate_menu_no)
+              }
+              if(checkedNodes[n].data.fun_no){
+                req.funs.push(checkedNodes[n].data.fun_no)
               }
               let srv = {
               "service": "srvtest_table_select",
               "operate_type": "select"
             }
-              if(node.relate_srv){
+              if(checkedNodes[n].data.relate_srv){
                 srv = {
-                  "service":node.relate_srv,
-                  "operate_type": node.srv_type
+                  "service":checkedNodes[n].data.relate_srv,
+                  "operate_type": checkedNodes[n].data.srv_type
                 }
                 req.srvs.push(JSON.stringify(srv))
-                 
               }
           }
           req.funs = Array.from(new Set(req.funs))
@@ -224,31 +237,41 @@ export default {
            return item[self.nodeKey]
         })
         let allNodes = self.$refs[tree][0].store._getAllNodes()
-      if(index === 0){
-          if(e.value == 'checked'){
+        if(e.value == 'checked'){
             if(e.checked){
-              this.$refs.tree0[0].setCheckedKeys(allKeys)
+              this.$refs[tree][0].setCheckedKeys(allKeys)
               self.checkedNodes = allNodes.map((item) => item.data)
             }else{
-              this.$refs.tree0[0].setCheckedKeys([])
+              this.$refs[tree][0].setCheckedKeys([])
               let checkNodes = []
               self.checkedNodes = checkNodes.map((item) => item)
             }
           }
-      }else if(index === 1){
-          if(e.value == 'checked'){
-            if(e.checked){
-              this.$refs.tree1[0].setCheckedKeys(allKeys)
-            }else{
-              this.$refs.tree1[0].setCheckedKeys([])
-            }
-          }
-      }
+      // if(index === 0){
+      //     if(e.value == 'checked'){
+      //       if(e.checked){
+      //         this.$refs.tree0[0].setCheckedKeys(allKeys)
+      //         self.checkedNodes = allNodes.map((item) => item.data)
+      //       }else{
+      //         this.$refs.tree0[0].setCheckedKeys([])
+      //         let checkNodes = []
+      //         self.checkedNodes = checkNodes.map((item) => item)
+      //       }
+      //     }
+      // }else if(index === 1){
+      //     if(e.value == 'checked'){
+      //       if(e.checked){
+      //         this.$refs.tree1[0].setCheckedKeys(allKeys)
+      //       }else{
+      //         this.$refs.tree1[0].setCheckedKeys([])
+      //       }
+      //     }
+      // }
 
       if(e.value == 'expand'){
 
               let isExpand = e.checked 
-              console.log(allNodes,this.$refs.tree0[0])
+              console.log(allNodes,this.$refs[tree][0])
               allNodes = allNodes.map((item) =>{
                  item['expanded'] = isExpand
                  return  item
@@ -259,10 +282,70 @@ export default {
       self.$forceUpdate()
     },
     treeCurrentChange(checkedNodes,checkedKeys){
+      let self = this
       let nodes = checkedKeys.checkedNodes
       this.checkedNodes = nodes.map((item) => item)
+       let type = checkedNodes.terminal_type
+       let ref = 'tree'
+       for(let i = 0;i<self.terminalType.length;i++){
+           if(self.terminalType[i].terminal_type == type){
+              ref = ref+i
+           }
+       }
+       let allNodes = self.$refs[ref][0].store._getAllNodes()   // copy 当前所有节点
+       let allKeys = []
+       let checked = false
+       let requirechild = []
+       for(let node of allNodes){
+          if(node.data[self.nodeKey] == checkedNodes[self.nodeKey]){
+             checked = node.checked
+             let childNodes = node.childNodes
+             for(let child of childNodes){
+                 if(child.data.is_require_srv == '是'){
+                    requirechild.push(child.data[self.nodeKey])
+                    if(child.childNodes.length > 0){
+                      let chrs = this.treeCurrentChangeChildNodes(child.childNodes)
+                      requirechild =   requirechild.concat(chrs)
+                    }
+                 }
+              }
+          }
+       }
+
+       for(let node of allNodes){
+            if(requirechild.indexOf(node.data[this.nodeKey]) !== -1){
+                if(checked){
+                  allKeys.push(node.data[self.nodeKey]) 
+                }
+            }else{
+                if(node.checked){
+                    allKeys.push(node.data[self.nodeKey]) 
+                }
+            }
+       }
+       this.$refs[ref][0].setCheckedKeys(allKeys)
+
+       console.log('treeCurrentChange',type,ref,requirechild,checkedNodes,allKeys,checked)
+    },
+    treeCurrentChangeChildNodes(childNodes){
+      let self = this
+      let keysarr = []
+      let childs = []
+      for(let child of childNodes){
+        if(child.data.is_require_srv == '是'){
+              keysarr.push(child.data[self.nodeKey])
+              childs = child.childNodes
+        }
+      }
+      if(childs.length > 0){
+           const childks = self.treeCurrentChangeChildNodes(childs)
+           keysarr =  keysarr.concat(childks) 
+        }
+      return keysarr
        
-      //  console.log('treeCurrentChange',checkedKeys.checkedNodes)
+    },
+    currentChange(data,node){
+       console.log('currentChange',data,node)
     },
     loadUpdateDefaultData(){
       let self = this
@@ -383,6 +466,7 @@ export default {
               let children = self.bxDeepClone(param)
               children['label'] = children[self.nodeLabel]
               children['children'] = self.getchilds(children[self.nodeKey], list)  // 获取子节点
+              children['disabled'] = param.is_require_srv == '是' ? true : false
               result.push(children)
             }
           }
@@ -423,8 +507,9 @@ export default {
       for (const child of childs) { // 获取子节点的子节点
         const childscopy = self.getchilds(child[self.nodeKey], array)// 递归获取子节点
         
-          child['label'] = child[self.nodeLabel]
+        child['label'] = child[self.nodeLabel]
         child['children'] = childscopy
+        child['disabled'] = child.is_require_srv == '是' ? true : false
       }
       return childs
     },

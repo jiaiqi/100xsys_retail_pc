@@ -93,17 +93,17 @@ export default {
       activeName: "tab0",
       tabs: [
         {
-          label: "角色",
-          service: "srvsys_app_role_select",
-          condition: [],
-        },
-        {
-          label: "员工管理",
+          label: "员工信息",
           service: "srvretail_store_staff_select",
           condition: [],
         },
         {
-          label: "已结账",
+          label: "角色权限管理",
+          service: "srvsys_app_role_select",
+          condition: [],
+        },
+        {
+          label: "交接班历史",
           service: "srvretail_staff_handover_select",
           condition: [],
         },

@@ -67,6 +67,10 @@
 
 
 <script>
+// ,{
+//             label:"更新",
+//             value:"update"
+//           }
 export default {
   props: {
     service: {
@@ -105,9 +109,6 @@ export default {
           options:[{
             label:"新增",
             value:"add"
-          },{
-            label:"更新",
-            value:"update"
           }]
         }
       },

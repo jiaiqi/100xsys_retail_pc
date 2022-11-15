@@ -24,8 +24,19 @@
     <el-row v-show="!hideButtons" type="flex" class="row-bg" justify="space-between" v-if="gridButtonPos == 'top'">
        <div class="table-head-btns">
           <el-button type="primary" size="small" v-if="(defaultDirtyFlags == 'add' || listType ==  'updatechildlist') && batchAddButton && batchAddButton.hasOwnProperty('batchAdd') && batchAddButton.batchAdd.isDisp" @click.stop="onBatchAddCheckButton()">
-            {{batchAddButton.batchAdd.buttonName}}
+            <!-- {{batchAddButton.batchAdd.buttonName}} -->
+            选择商品
           </el-button>
+
+          <el-popover
+            placement="right"
+            width="400"
+            trigger="click">
+            <div v-html="moreConfig.table_explain.desc">{{moreConfig.table_explain.desc}}</div>
+              
+            <div slot="reference">列表字段说明<i  class="el-icon-question"></i></div>
+          </el-popover>
+          
         </div>
       <div class="table-head-btns">
        
@@ -55,8 +66,47 @@
           <el-table header-row-class-name="header-row" :data="gridDataRun" stripe border style="width: 100%" :row-class-name="tableRowClassName" row-key="id" highlight-current-row @selection-change="handleSelectionChange" @filter-change="filterChange" :sortable="tabBasicsConfig.sortable" @sort-change="handleSortChange" :show-summary="getShowTableSummary()" :summary-method="onSummaryMethod" @row-dblclick="onRowDbClicked">
             <el-table-column type="selection" label="全选" header-align="left" width="50px" v-if="(selection && !readOnly) || listType=='selectlist' && (mode && mode == 'finder' ? false : true)">
             </el-table-column>
+
             <!-- v-if="(item.show && (!item.evalVisible || item.evalVisible()))" ---↓-->
-            <el-table-column v-for="(item, index) in gridHeader" :key="index" header-align="left" v-if="getGridHeaderDispExps(item,listMainFormDatas)" :width="item.width ? item.width : getListShowFileList(item) ? item.list_min_width ? item.list_min_width : 180 : ''" :filter-method="item.filters && tabBasicsConfig.sortable ? filterHandler : null" :prop="item.column" :align="item.align" :fixed="item.rowFixed ? true : null" :show-overflow-tooltip="getListShowFileList(item) === true ? false : true" :label="item.label" :min-width="item.list_min_width + 'px'"  :column-key="item.column" :sortable="tabBasicsConfig.sortable && item.sortable && !isMem() ? 'custom' : false">
+            <el-table-column v-for="(item, index) in gridHeader" :key="index" header-align="left" v-if="getGridHeaderDispExps(item,listMainFormDatas)" :width="item.width ? item.width : getListShowFileList(item) ? item.list_min_width ? item.list_min_width : 180 : ''" :filter-method="item.filters && tabBasicsConfig.sortable ? filterHandler : null" :prop="item.column" :fixed="item.rowFixed ? true : null" :label="item.section_title && getTableHeaderChild(item).headerIsShow ? item.section_title : item.label" :min-width="item.list_min_width + 'px'"  :column-key="item.column" :sortable="tabBasicsConfig.sortable && item.sortable && !isMem() ? 'custom' : false" :align="getTableHeaderChild(item).headerIsShow ? 'center':item.align">
+              <template slot="header" slot-scope="scope">
+                  {{item.section_title && getTableHeaderChild(item).headerIsShow ? item.section_title : item.label}}
+                  <span style="line-height:40px;width:40px;height:40px" v-if="getShowHelpTips(item)" class="help-tips">
+                
+                    <el-popover 
+                    ref="tippopover"
+                    placement="top" 
+                    width="200" 
+                    trigger="hover" 
+                    :content="getHelpTipsText(scope.column
+  )">
+                    <i slot="reference" class="el-icon-question" style="color:#444;font-size:16px;"></i>
+                    </el-popover>
+                      
+                  </span>
+                </template>
+              <!-- :show-overflow-tooltip="getListShowFileList(item) === true ? false : true"  -->
+              <!-- // 内容溢出 悬停显示 与 帮助信息悬停显示 冲突 -->
+              <el-table-column  v-for="(citem, index) in getTableHeaderChild(item).headChild" :key="index" header-align="left" v-if="getGridHeaderDispExps(citem,listMainFormDatas)" :width="citem.width ? citem.width : getListShowFileList(citem) ? citem.list_min_width ? citem.list_min_width : 180 : ''" :filter-method="citem.filters && tabBasicsConfig.sortable ? filterHandler : null" :prop="citem.column" :align="citem.align" :fixed="citem.rowFixed ? true : null" :label="citem.label" :min-width="citem.list_min_width + 'px'"  :column-key="citem.column" :sortable="tabBasicsConfig.sortable && citem.sortable && !isMem() ? 'custom' : false">
+                 <!-- 二级嵌套表头 -->
+                <template slot="header" slot-scope="scope">
+                  {{citem.label}}
+                  <span style="line-height:40px;width:40px;height:40px" v-if="getShowHelpTips(citem)" class="help-tips">
+                
+                    <el-popover 
+                    ref="tippopover"
+                    placement="top" 
+                    width="200" 
+                    trigger="hover" 
+                    :content="getHelpTipsText(scope.column
+  )">
+                    <i slot="reference" class="el-icon-question" style="color:#444;font-size:16px;"></i>
+                    </el-popover>
+                      
+                  </span>
+                </template>
+              
+            </el-table-column>
               <template slot-scope="scope">
                 <!-- v-if="isInplaceEdit()  &&findEditField(scope.row, item.column)" -->
                 <div v-if="(listType == 'addchildlist' || listType == 'updatechildlist') && item.srvcol.hasOwnProperty('updatable') && item.srvcol.updatable == 1" class="is-InplaceEdit">
@@ -373,7 +423,8 @@ export default {
       pageCount: 0,
       scale: 100, //放大系数
       currentUrlLike: "",
-      imagesRun: []
+      imagesRun: [],
+      
     };
   },
 
@@ -416,7 +467,23 @@ export default {
   },
 
   methods: {
-    
+    getHelpTipsText(e){
+       console.log('getHelpTipsText',e)
+       let str = ''
+      if(e ){
+        let list = this.gridHeader.filter(item => e.columnKey == item.column)
+        let config = list[0].more_config || {}
+        str = config.help_tips || ''
+      }
+       return str
+    },
+    getShowHelpTips(e) {
+      if (e.more_config && e.more_config.hasOwnProperty("help_tips")) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     wrapCellIntoField(column, value) {
       let info = {
         editable: false

@@ -159,7 +159,15 @@ export default {
     sortedAllFields: function () {
       return this.sortFields(this.allFields);
     },
-
+    sectionsSwitch:function(){
+       let sec = {
+        
+       }
+       for(let item in this.sections){
+          console.log(item)
+       }
+      return sec
+    },
     sections: function () {
       let sections = {};
       let fields = null;

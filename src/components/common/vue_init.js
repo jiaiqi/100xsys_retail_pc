@@ -136,7 +136,7 @@ function init() {
               type: 2,
               content: window.location.origin+login_page,
               closeBtn: 0,
-              area: ['300px', '350px'],
+              area: ['400px', '600px'],
               shade: 0.9
             });
 
